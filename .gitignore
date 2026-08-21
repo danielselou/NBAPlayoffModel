@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated/cached data and pipeline outputs (regenerate via `python main.py`)
+data/raw/*.parquet
+data/processed/*
+output/*
+!output/.gitkeep
+!data/raw/.gitkeep
+!data/processed/.gitkeep
