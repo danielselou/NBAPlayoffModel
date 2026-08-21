@@ -10,3 +10,7 @@ output/*
 !output/.gitkeep
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+
+# Generated dashboard payload/page (regenerate via `python -m dashboard.build`)
+dashboard/data.json
+dashboard/index.html

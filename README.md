@@ -63,6 +63,22 @@ bracket simulation -- printed metrics plus these files in `output/`:
 - `monte_carlo_odds_<year>.csv` — bracket-simulation round-by-round odds
 - `trained_models.joblib` — the fitted ensemble (reloadable via `joblib.load`)
 
+## Visual dashboard
+
+```bash
+python -m dashboard.build   # runs the pipeline, writes dashboard/index.html
+```
+
+Produces a self-contained HTML page — conference standings in the familiar
+seed/W-L/PCT/GB format, plus a full playoff bracket (both conferences
+converging on the Finals) with the model's estimated win probability for
+every actual series, upsets flagged. Open `dashboard/index.html` directly in
+a browser. `dashboard/export_data.py` reconstructs the bracket from seeds +
+`rounds_won` (NBA brackets never re-seed, so the winner at each node is
+fully determined) and re-simulates each real matchup thousands of times for
+its probability; `dashboard/team_meta.py` holds team display names/colors;
+`dashboard/template.html` is the page itself.
+
 ## Tests
 
 ```bash

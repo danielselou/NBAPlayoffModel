@@ -1,0 +1,512 @@
+<title>Playoff Power Rankings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F3F4F7;
+    --surface: #FFFFFF;
+    --surface-2: #ECEEF3;
+    --surface-3: #E2E5EC;
+    --border: #D8DCE4;
+    --ink: #171A21;
+    --ink-2: #565E6E;
+    --ink-3: #868FA0;
+    --accent-east: #2E6BA8;
+    --accent-east-soft: #E4EDF7;
+    --accent-west: #C25A15;
+    --accent-west-soft: #F8E9DC;
+    --prob: #6B57C9;
+    --prob-track: #E4E1F5;
+    --status-upset: #B23A3A;
+    --status-upset-soft: #F7E3E3;
+    --shadow: 0 1px 2px rgba(23,26,33,0.06), 0 8px 24px rgba(23,26,33,0.05);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0C0F14;
+      --surface: #161A22;
+      --surface-2: #1E232D;
+      --surface-3: #272E3A;
+      --border: #2C3341;
+      --ink: #EEF0F4;
+      --ink-2: #9CA5B6;
+      --ink-3: #6D7688;
+      --accent-east: #6EA3DD;
+      --accent-east-soft: #1B2A3B;
+      --accent-west: #E28A46;
+      --accent-west-soft: #3A2717;
+      --prob: #9C8BE8;
+      --prob-track: #2A2540;
+      --status-upset: #E27878;
+      --status-upset-soft: #3A2020;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 28px rgba(0,0,0,0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0C0F14;
+    --surface: #161A22;
+    --surface-2: #1E232D;
+    --surface-3: #272E3A;
+    --border: #2C3341;
+    --ink: #EEF0F4;
+    --ink-2: #9CA5B6;
+    --ink-3: #6D7688;
+    --accent-east: #6EA3DD;
+    --accent-east-soft: #1B2A3B;
+    --accent-west: #E28A46;
+    --accent-west-soft: #3A2717;
+    --prob: #9C8BE8;
+    --prob-track: #2A2540;
+    --status-upset: #E27878;
+    --status-upset-soft: #3A2020;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 28px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.45;
+  }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 20px 64px; }
+
+  h1, h2, h3, .display {
+    font-family: "Oswald", "Arial Narrow", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-wrap: balance;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .eyebrow {
+    font-family: "Oswald", sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* ---------- header ---------- */
+  header.page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 20px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  header.page-head h1 { font-size: clamp(26px, 4vw, 38px); }
+  .subtitle { color: var(--ink-2); font-size: 14.5px; margin-top: 6px; max-width: 60ch; }
+  .head-meta { text-align: right; }
+  .head-meta .eyebrow { display: block; }
+  .head-meta .season { font-family: "Oswald", sans-serif; font-size: 22px; font-weight: 600; }
+
+  /* ---------- champion banner ---------- */
+  .champion-banner {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background: linear-gradient(135deg, var(--surface-2), var(--surface));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 24px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow);
+  }
+  .champion-banner .laurel { flex: none; width: 46px; height: 46px; color: var(--prob); }
+  .champion-banner .cb-text .eyebrow { color: var(--prob); }
+  .champion-banner .cb-text h2 { font-size: 24px; margin-top: 2px; }
+  .champion-banner .cb-text .cb-sub { color: var(--ink-2); font-size: 13.5px; margin-top: 3px; }
+  .champion-banner .cb-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: -1px; }
+
+  /* ---------- section headings ---------- */
+  section { margin-bottom: 40px; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+  .section-head h2 { font-size: 20px; }
+  .section-head .section-note { color: var(--ink-3); font-size: 12.5px; }
+
+  /* ---------- standings ---------- */
+  .standings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 860px) { .standings-grid { grid-template-columns: 1fr; } }
+
+  .conf-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .conf-card-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 18px;
+    font-family: "Oswald", sans-serif;
+    font-weight: 600; font-size: 15px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .conf-card-head .bar { width: 5px; height: 18px; border-radius: 3px; }
+  .conf-card[data-conf="East"] .conf-card-head .bar { background: var(--accent-east); }
+  .conf-card[data-conf="West"] .conf-card-head .bar { background: var(--accent-west); }
+  .conf-card[data-conf="East"] .conf-card-head { background: var(--accent-east-soft); }
+  .conf-card[data-conf="West"] .conf-card-head { background: var(--accent-west-soft); }
+
+  table.standings { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  table.standings th, table.standings td { padding: 7px 10px; text-align: right; white-space: nowrap; }
+  table.standings th:first-child, table.standings td:first-child { width: 24px; }
+  table.standings th:nth-child(3), table.standings td:nth-child(3),
+  table.standings th:nth-child(4), table.standings td:nth-child(4) { width: 28px; }
+  table.standings th:nth-child(5), table.standings td:nth-child(5) { width: 48px; }
+  table.standings th:nth-child(6), table.standings td:nth-child(6) { width: 40px; }
+  table.standings th:nth-child(7), table.standings td:nth-child(7) { width: 58px; }
+  table.standings th:nth-child(8), table.standings td:nth-child(8) { width: 116px; }
+  table.standings th {
+    font-family: "Oswald", sans-serif; font-weight: 500; font-size: 10.5px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--surface);
+  }
+  table.standings th.team-col, table.standings td.team-col { text-align: left; white-space: normal; }
+  table.standings td.seed { color: var(--ink-3); font-weight: 500; width: 22px; }
+  table.standings tr.team-row:hover td { background: var(--surface-2); }
+  table.standings tr.cutline td { border-bottom: 2px dashed var(--border); }
+  table.standings tr.play-in td { color: var(--ink-3); }
+  table.standings tr.play-in td.team-col { color: var(--ink-2); }
+
+  .team-cell { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,0.12) inset; }
+  .team-abbr { font-weight: 600; flex: none; }
+  .team-name {
+    color: var(--ink-3); font-size: 11.5px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  }
+
+  .odds-cell { display: flex; align-items: center; gap: 7px; justify-content: flex-end; }
+  .meter { width: 56px; height: 5px; border-radius: 3px; background: var(--prob-track); overflow: hidden; flex: none; }
+  .meter > span { display: block; height: 100%; background: var(--prob); border-radius: 3px 0 0 3px; }
+  .odds-pct { width: 34px; text-align: right; font-size: 12px; color: var(--ink-2); }
+
+  .cutline-label {
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3);
+    text-align: center; padding: 3px 0; background: var(--surface-2);
+  }
+
+  /* ---------- bracket ---------- */
+  .bracket-scroll { overflow-x: auto; border-radius: 14px; }
+  .bracket-scroll svg { display: block; min-width: 980px; width: 100%; height: auto; }
+
+  .bnode-box { fill: var(--surface); stroke: var(--border); }
+  .bnode-name { font-family: "IBM Plex Sans", sans-serif; font-size: 12.5px; fill: var(--ink); }
+  .bnode-name.loser { fill: var(--ink-3); }
+  .bnode-seed { font-family: "Oswald", sans-serif; font-size: 10.5px; fill: var(--ink-3); }
+  .bnode-seed.loser { fill: var(--ink-3); opacity: 0.6; }
+  .bconn { stroke: var(--border); stroke-width: 1.5; fill: none; }
+  .bprob { font-family: "IBM Plex Sans", sans-serif; font-size: 10px; fill: var(--ink-3); }
+  .bupset { fill: var(--status-upset); font-weight: 600; }
+  .conf-label { font-family: "Oswald", sans-serif; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .conf-label.east { fill: var(--accent-east); }
+  .conf-label.west { fill: var(--accent-west); }
+  .conf-label.finals { fill: var(--prob); }
+  .finals-box { fill: var(--surface); stroke: var(--prob); stroke-width: 1.5; }
+  .champ-crown { fill: var(--prob); }
+
+  /* ---------- footer ---------- */
+  footer { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 8px; }
+  .metrics-row { display: flex; gap: 28px; flex-wrap: wrap; margin-bottom: 14px; }
+  .metric { min-width: 120px; }
+  .metric .m-value { font-family: "Oswald", sans-serif; font-size: 22px; font-weight: 600; }
+  .metric .m-label { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .methodology-note { color: var(--ink-3); font-size: 12px; max-width: 74ch; }
+  .methodology-note a { color: inherit; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .team-row { transition: background-color 120ms ease; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow" id="season-eyebrow">Season</span>
+      <h1>Playoff Power Rankings</h1>
+      <p class="subtitle">Regular-season standings and a full postseason bracket, generated by the ensemble model: composite team ratings, injury-adjusted, cross-checked against a 10,000-run Monte Carlo bracket simulation.</p>
+    </div>
+    <div class="head-meta">
+      <span class="eyebrow">Model season</span>
+      <div class="season" id="season-label">—</div>
+    </div>
+  </header>
+
+  <div class="champion-banner" id="champion-banner"></div>
+
+  <section id="standings-section">
+    <div class="section-head">
+      <h2>Regular Season Standings</h2>
+      <span class="section-note">Seed &middot; W&ndash;L &middot; PCT &middot; GB &middot; Net Rtg &middot; Playoff Odds</span>
+    </div>
+    <div class="standings-grid" id="standings-grid"></div>
+  </section>
+
+  <section id="bracket-section">
+    <div class="section-head">
+      <h2>Playoff Bracket</h2>
+      <span class="section-note">Win probability shown is the model's estimate for the series' actual winner</span>
+    </div>
+    <div class="bracket-scroll">
+      <svg id="bracket-svg" viewBox="0 0 1400 460" role="img" aria-label="NBA-style playoff bracket showing each round's winner and the model's win probability for that series"></svg>
+    </div>
+  </section>
+
+  <footer>
+    <div class="metrics-row" id="metrics-row"></div>
+    <p class="methodology-note">Model metrics reflect out-of-sample seasons held out of training. Standings, ratings, and bracket results come from the project's synthetic league generator (an internally-consistent stand-in for real box scores) &mdash; see the project README for methodology and how to point this at live data.</p>
+  </footer>
+</div>
+
+<script id="dashboard-data" type="application/json">__DASHBOARD_DATA__</script>
+<script>
+(function () {
+  const DATA = JSON.parse(document.getElementById("dashboard-data").textContent);
+
+  function teamMeta(abbr) {
+    return DATA.teams[abbr] || { name: abbr, color: "#999999" };
+  }
+
+  function pct(x) { return Math.round(x * 100) + "%"; }
+
+  function dot(abbr) {
+    return `<span class="dot" style="background:${teamMeta(abbr).color}"></span>`;
+  }
+
+  // ---------------- header ----------------
+  document.getElementById("season-eyebrow").textContent = DATA.season + " Season";
+  document.getElementById("season-label").textContent = DATA.season;
+
+  // ---------------- champion banner ----------------
+  (function renderBanner() {
+    const champ = DATA.bracket.finals.winner;
+    const meta = teamMeta(champ);
+    const banner = document.getElementById("champion-banner");
+    banner.innerHTML = `
+      <svg class="laurel" viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M24 6 L28 18 L40 18 L30 26 L34 38 L24 30 L14 38 L18 26 L8 18 L20 18 Z" fill="currentColor"/>
+      </svg>
+      <div class="cb-text">
+        <span class="eyebrow">${DATA.season} Champion</span>
+        <h2><span class="cb-dot" style="background:${meta.color}"></span>${meta.name}</h2>
+        <div class="cb-sub">Won the Finals with a model-estimated ${pct(DATA.bracket.finals.winner_prob)} series probability</div>
+      </div>`;
+  })();
+
+  // ---------------- standings ----------------
+  function renderConference(conf) {
+    const rows = DATA.standings[conf];
+    const trs = rows.map((r, i) => {
+      const meta = teamMeta(r.team);
+      const cutline = i === 7 ? "cutline" : "";
+      const playIn = i >= 8 ? "play-in" : "";
+      return `
+        <tr class="team-row ${cutline} ${playIn}">
+          <td class="seed">${r.seed}</td>
+          <td class="team-col">
+            <div class="team-cell">
+              ${dot(r.team)}
+              <span class="team-abbr">${r.team}</span>
+              <span class="team-name">${meta.name}</span>
+            </div>
+          </td>
+          <td>${r.wins}</td>
+          <td>${r.losses}</td>
+          <td>${r.win_pct.toFixed(3).replace(/^0/, "")}</td>
+          <td>${r.gb === 0 ? "&ndash;" : r.gb.toFixed(1)}</td>
+          <td>${r.rating > 0 ? "+" + r.rating.toFixed(1) : r.rating.toFixed(1)}</td>
+          <td>
+            <div class="odds-cell">
+              <span class="meter"><span style="width:${Math.round(r.playoff_prob * 100)}%"></span></span>
+              <span class="odds-pct">${pct(r.playoff_prob)}</span>
+            </div>
+          </td>
+        </tr>`;
+    }).join("");
+
+    return `
+      <div class="conf-card" data-conf="${conf}">
+        <div class="conf-card-head"><span class="bar"></span>${conf}ern Conference</div>
+        <table class="standings">
+          <thead><tr>
+            <th>#</th><th class="team-col">Team</th><th>W</th><th>L</th><th>PCT</th><th>GB</th><th>Net Rtg</th><th>Playoff&nbsp;Odds</th>
+          </tr></thead>
+          <tbody>${trs}</tbody>
+        </table>
+      </div>`;
+  }
+
+  document.getElementById("standings-grid").innerHTML =
+    renderConference("East") + renderConference("West");
+
+  // ---------------- bracket (SVG built programmatically) ----------------
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const svg = document.getElementById("bracket-svg");
+  const BOX_W = 148, BOX_H = 40, ROW_GAP = 6;
+
+  function el(tag, attrs) {
+    const e = document.createElementNS(SVG_NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  function drawNode(x, y, node, align) {
+    const g = el("g", {});
+    g.appendChild(el("rect", { x, y, width: BOX_W, height: BOX_H, rx: 6, class: "bnode-box" }));
+    const teams = [
+      { abbr: node.teamA, seed: node.seedA },
+      { abbr: node.teamB, seed: node.seedB },
+    ];
+    teams.forEach((t, i) => {
+      const rowY = y + 14 + i * 18;
+      const isWinner = t.abbr === node.winner;
+      const cls = isWinner ? "" : " loser";
+      let dotX, nameX, seedTextX;
+      if (align === "right") {
+        seedTextX = x + BOX_W - 10;
+        dotX = x + BOX_W - 26;
+        nameX = x + BOX_W - 34;
+      } else {
+        seedTextX = x + 10;
+        dotX = x + 26;
+        nameX = x + 34;
+      }
+      const seedT = el("text", { x: seedTextX, y: rowY, class: "bnode-seed" + cls, "text-anchor": align === "right" ? "end" : "start" });
+      seedT.textContent = t.seed;
+      g.appendChild(seedT);
+      g.appendChild(el("circle", { cx: dotX, cy: rowY - 4, r: 4, fill: teamMeta(t.abbr).color }));
+      const nameT = el("text", { x: nameX, y: rowY, class: "bnode-name" + cls, "text-anchor": align === "right" ? "end" : "start", "font-weight": isWinner ? "600" : "400" });
+      nameT.textContent = t.abbr;
+      g.appendChild(nameT);
+    });
+    svg.appendChild(g);
+  }
+
+  function elbow(x1, y1, x2, y2) {
+    const midX = (x1 + x2) / 2;
+    const path = `M ${x1} ${y1} H ${midX} V ${y2} H ${x2}`;
+    svg.appendChild(el("path", { d: path, class: "bconn" }));
+  }
+
+  function probLabel(x, y, node, align) {
+    const upset = node.winner_prob < 0.35;
+    const anchor = align === "right" ? "end" : align === "center" ? "middle" : "start";
+    const t = el("text", { x, y, class: "bprob" + (upset ? " bupset" : ""), "text-anchor": anchor });
+    t.textContent = (upset ? "UPSET · " : "") + Math.round(node.winner_prob * 100) + "% to win series";
+    svg.appendChild(t);
+  }
+
+  function layoutConference(bracket, side) {
+    // side: "left" (East) or "right" (West)
+    const flip = side === "right";
+    const colX = flip
+      ? [1400 - 20 - BOX_W, 1400 - 20 - BOX_W * 2 - 40, 1400 - 20 - BOX_W * 3 - 80]
+      : [20, 20 + BOX_W + 40, 20 + BOX_W * 2 + 80];
+    const align = flip ? "right" : "left";
+
+    const r1Ys = [40, 40 + BOX_H + 76, 40 + 2 * (BOX_H + 76), 40 + 3 * (BOX_H + 76)];
+    bracket.round1.forEach((node, i) => {
+      drawNode(colX[0], r1Ys[i], node, align);
+      probLabel(colX[0] + (flip ? BOX_W : 0), r1Ys[i] + BOX_H + 13, node, align);
+    });
+
+    const semiYs = [
+      (r1Ys[0] + r1Ys[1]) / 2 + 30,
+      (r1Ys[2] + r1Ys[3]) / 2 + 30,
+    ];
+    bracket.semis.forEach((node, i) => {
+      drawNode(colX[1], semiYs[i], node, align);
+      probLabel(colX[1] + (flip ? BOX_W : 0), semiYs[i] + BOX_H + 13, node, align);
+    });
+
+    const cfY = (semiYs[0] + semiYs[1]) / 2;
+    drawNode(colX[2], cfY, bracket.conf_finals, align);
+    probLabel(colX[2] + (flip ? BOX_W : 0), cfY + BOX_H + 13, bracket.conf_finals, align);
+
+    // connectors: round1 -> semis
+    r1Ys.forEach((y, i) => {
+      const targetY = i < 2 ? semiYs[0] : semiYs[1];
+      const x1 = flip ? colX[0] : colX[0] + BOX_W;
+      const x2 = flip ? colX[1] + BOX_W : colX[1];
+      elbow(x1, y + BOX_H / 2, x2, targetY + BOX_H / 2);
+    });
+    // semis -> conf finals
+    semiYs.forEach((y) => {
+      const x1 = flip ? colX[1] : colX[1] + BOX_W;
+      const x2 = flip ? colX[2] + BOX_W : colX[2];
+      elbow(x1, y + BOX_H / 2, x2, cfY + BOX_H / 2);
+    });
+
+    return { x: colX[2], y: cfY };
+  }
+
+  const eastAnchor = layoutConference(DATA.bracket.East, "left");
+  const westAnchor = layoutConference(DATA.bracket.West, "right");
+
+  // conference labels
+  const eastLabel = el("text", { x: 20, y: 20, class: "conf-label east" });
+  eastLabel.textContent = "Eastern Conference";
+  svg.appendChild(eastLabel);
+  const westLabel = el("text", { x: 1380, y: 20, class: "conf-label west", "text-anchor": "end" });
+  westLabel.textContent = "Western Conference";
+  svg.appendChild(westLabel);
+
+  // Finals box, centered
+  const finalsY = (eastAnchor.y + westAnchor.y) / 2;
+  const finalsX = 700 - BOX_W / 2;
+  const finals = DATA.bracket.finals;
+  const finalsNode = { teamA: finals.teamEast, teamB: finals.teamWest, seedA: "E", seedB: "W", winner: finals.winner };
+  svg.appendChild(el("rect", { x: finalsX, y: finalsY, width: BOX_W, height: BOX_H, rx: 6, class: "finals-box" }));
+  [finals.teamEast, finals.teamWest].forEach((abbr, i) => {
+    const rowY = finalsY + 14 + i * 18;
+    const isWinner = abbr === finals.winner;
+    svg.appendChild(el("circle", { cx: finalsX + 20, cy: rowY - 4, r: 4, fill: teamMeta(abbr).color }));
+    const t = el("text", { x: finalsX + 28, y: rowY, class: "bnode-name" + (isWinner ? "" : " loser"), "font-weight": isWinner ? "600" : "400" });
+    t.textContent = abbr;
+    svg.appendChild(t);
+  });
+  const finalsLabel = el("text", { x: 700, y: finalsY - 12, class: "conf-label finals", "text-anchor": "middle" });
+  finalsLabel.textContent = "NBA Finals";
+  svg.appendChild(finalsLabel);
+  probLabel(700, finalsY + BOX_H + 15, finals, "center");
+
+  elbow(eastAnchor.x + BOX_W, eastAnchor.y + BOX_H / 2, finalsX, finalsY + BOX_H / 2 - 8);
+  elbow(westAnchor.x, westAnchor.y + BOX_H / 2, finalsX + BOX_W, finalsY + BOX_H / 2 + 8);
+
+  // Champion crown mark above the Finals box
+  const crownG = el("g", { transform: `translate(${700 - 9}, ${finalsY - 34})` });
+  crownG.appendChild(el("path", {
+    d: "M0 12 L3 2 L9 8 L14 -2 L19 8 L25 2 L28 12 Z",
+    class: "champ-crown",
+  }));
+  svg.appendChild(crownG);
+
+  // ---------------- metrics ----------------
+  const m = DATA.metrics;
+  const metrics = [
+    { label: "Made Playoffs · Accuracy", value: pct(m.made_playoffs.accuracy) },
+    { label: "Made Playoffs · ROC AUC", value: m.made_playoffs.roc_auc.toFixed(2) },
+    { label: "Rounds Won · Accuracy", value: pct(m.rounds_won.accuracy) },
+    { label: "Champion · ROC AUC", value: m.champion.roc_auc.toFixed(2) },
+  ];
+  document.getElementById("metrics-row").innerHTML = metrics.map(x =>
+    `<div class="metric"><div class="m-value">${x.value}</div><div class="m-label">${x.label}</div></div>`
+  ).join("");
+})();
+</script>
