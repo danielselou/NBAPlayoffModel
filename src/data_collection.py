@@ -31,7 +31,7 @@ import numpy as np
 import pandas as pd
 
 from config import (
-    DATA_RAW_DIR, EASTERN_CONFERENCE, END_SEASON_YEAR, PLAYERS_PER_TEAM,
+    DATA_RAW_DIR, EASTERN_CONFERENCE, END_SEASON_YEAR, MAX_MODELED_YEAR, PLAYERS_PER_TEAM,
     RANDOM_SEED, ROTATION_SIZE, START_SEASON_YEAR, TEAMS, WESTERN_CONFERENCE,
 )
 from src.simulate import simulate_series
@@ -88,10 +88,17 @@ def fetch_real_season(year: int, cache_dir: Path = DATA_RAW_DIR) -> dict[str, pd
 # --------------------------------------------------------------------------
 
 def _make_player_universe(n_players: int, seed: int) -> pd.DataFrame:
-    """A fixed pool of players with persistent career-long latent traits."""
+    """A fixed pool of players with persistent career-long latent traits.
+
+    entry_year spans through MAX_MODELED_YEAR (a fixed global, independent of
+    whatever start_year/end_year a particular generate_synthetic_league call
+    requests) so rookies keep entering every "future" season too -- and so
+    historical seasons don't shift depending on how far into the future a
+    given call also asks for.
+    """
     rng = np.random.default_rng(seed)
     entry_age = rng.integers(19, 23, n_players)
-    entry_year = rng.integers(START_SEASON_YEAR - 10, END_SEASON_YEAR, n_players)
+    entry_year = rng.integers(START_SEASON_YEAR - 10, MAX_MODELED_YEAR, n_players)
     career_length = np.clip(rng.gamma(shape=3.0, scale=2.5, size=n_players).astype(int) + 1, 1, 20)
 
     return pd.DataFrame({
@@ -179,7 +186,7 @@ def generate_synthetic_league(start_year: int = START_SEASON_YEAR, end_year: int
     playoff results, for every season in [start_year, end_year] inclusive.
     """
     rng = np.random.default_rng(seed)
-    universe = _make_player_universe(n_players=int(PLAYERS_PER_TEAM * 30 * 7), seed=seed)
+    universe = _make_player_universe(n_players=int(PLAYERS_PER_TEAM * 30 * 9), seed=seed)
 
     player_season_rows = []
     team_season_rows = []

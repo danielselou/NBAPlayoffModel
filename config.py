@@ -16,6 +16,27 @@ START_SEASON_YEAR = 2000
 END_SEASON_YEAR = 2024
 CURRENT_SEASON_YEAR = END_SEASON_YEAR
 
+# "Present" boundary: seasons up to here are treated as history (the
+# generator's simulated outcome is revealed and can be compared against the
+# model's retrospective, walk-forward prediction). Seasons beyond this are
+# "the future" -- only the model's projection is shown, never the generator's
+# own simulated outcome, even though the generator can mechanically produce
+# one (it has to, to keep team strength evolving consistently year to year).
+PRESENT_YEAR = END_SEASON_YEAR
+FUTURE_HORIZON_YEARS = 10
+MAX_MODELED_YEAR = END_SEASON_YEAR + FUTURE_HORIZON_YEARS
+
+# Walk-forward evaluation: a year needs at least this many strictly-earlier
+# seasons of training data before it gets a genuine out-of-sample prediction.
+MIN_TRAIN_SEASONS = 3
+
+# Future-year confidence decay: baseline (measured historical walk-forward
+# accuracy) shrinks by this fraction per year beyond PRESENT_YEAR, floored --
+# compounding unknowns (rookies, injuries, trades, aging) make projections
+# further out genuinely less reliable, not just cosmetically labeled so.
+CONFIDENCE_DECAY_RATE = 0.06
+CONFIDENCE_FLOOR = 0.30
+
 TEAMS = [
     "ATL", "BOS", "BKN", "CHA", "CHI", "CLE", "DAL", "DEN", "DET", "GSW",
     "HOU", "IND", "LAC", "LAL", "MEM", "MIA", "MIL", "MIN", "NOP", "NYK",

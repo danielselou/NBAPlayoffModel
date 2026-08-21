@@ -18,8 +18,12 @@
     --accent-west-soft: #F8E9DC;
     --prob: #6B57C9;
     --prob-track: #E4E1F5;
-    --status-upset: #B23A3A;
-    --status-upset-soft: #F7E3E3;
+    --status-good: #1E7A46;
+    --status-good-soft: #E3F3E9;
+    --status-warn: #9A6A0C;
+    --status-warn-soft: #FBF0DA;
+    --status-bad: #B23A3A;
+    --status-bad-soft: #F7E3E3;
     --shadow: 0 1px 2px rgba(23,26,33,0.06), 0 8px 24px rgba(23,26,33,0.05);
   }
 
@@ -39,8 +43,12 @@
       --accent-west-soft: #3A2717;
       --prob: #9C8BE8;
       --prob-track: #2A2540;
-      --status-upset: #E27878;
-      --status-upset-soft: #3A2020;
+      --status-good: #6FCB94;
+      --status-good-soft: #16281E;
+      --status-warn: #E3B655;
+      --status-warn-soft: #332809;
+      --status-bad: #E27878;
+      --status-bad-soft: #3A2020;
       --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 28px rgba(0,0,0,0.35);
     }
   }
@@ -60,8 +68,12 @@
     --accent-west-soft: #3A2717;
     --prob: #9C8BE8;
     --prob-track: #2A2540;
-    --status-upset: #E27878;
-    --status-upset-soft: #3A2020;
+    --status-good: #6FCB94;
+    --status-good-soft: #16281E;
+    --status-warn: #E3B655;
+    --status-warn-soft: #332809;
+    --status-bad: #E27878;
+    --status-bad-soft: #3A2020;
     --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 28px rgba(0,0,0,0.35);
   }
 
@@ -95,6 +107,8 @@
     color: var(--ink-3);
   }
 
+  button { font-family: inherit; }
+
   /* ---------- header ---------- */
   header.page-head {
     display: flex;
@@ -103,7 +117,7 @@
     justify-content: space-between;
     gap: 16px;
     padding-bottom: 20px;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
     border-bottom: 1px solid var(--border);
   }
   header.page-head h1 { font-size: clamp(26px, 4vw, 38px); }
@@ -111,6 +125,46 @@
   .head-meta { text-align: right; }
   .head-meta .eyebrow { display: block; }
   .head-meta .season { font-family: "Oswald", sans-serif; font-size: 22px; font-weight: 600; }
+
+  /* ---------- season picker ---------- */
+  .season-picker {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 24px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px; box-shadow: var(--shadow);
+  }
+  .picker-group { display: flex; flex-direction: column; gap: 6px; }
+  .picker-group label { display: block; }
+  select#historical-select {
+    font-family: "IBM Plex Sans", sans-serif; font-size: 14px; font-weight: 600;
+    color: var(--ink); background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 10px; min-width: 190px;
+  }
+  .future-form { display: flex; gap: 8px; }
+  .future-form input {
+    font-family: "IBM Plex Sans", sans-serif; font-variant-numeric: tabular-nums; font-size: 14px;
+    color: var(--ink); background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 10px; width: 130px;
+  }
+  .future-form button {
+    font-size: 13px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase;
+    color: var(--bg); background: var(--prob); border: none; border-radius: 8px;
+    padding: 7px 16px; cursor: pointer;
+  }
+  .future-form button:hover { filter: brightness(1.08); }
+  .future-hint { font-size: 11.5px; color: var(--ink-3); max-width: 32ch; }
+  .future-hint.error { color: var(--status-bad); }
+
+  /* ---------- mode banner (future projection caution) ---------- */
+  .mode-banner {
+    display: none;
+    align-items: center; gap: 12px;
+    border-radius: 12px; padding: 12px 18px; margin-bottom: 20px;
+    background: var(--status-warn-soft); border: 1px solid var(--status-warn);
+    font-size: 13px; color: var(--ink);
+  }
+  .mode-banner.visible { display: flex; }
+  .mode-banner .mb-icon { flex: none; width: 20px; height: 20px; color: var(--status-warn); }
+  .mode-banner strong { color: var(--status-warn); }
 
   /* ---------- champion banner ---------- */
   .champion-banner {
@@ -129,6 +183,12 @@
   .champion-banner .cb-text h2 { font-size: 24px; margin-top: 2px; }
   .champion-banner .cb-text .cb-sub { color: var(--ink-2); font-size: 13.5px; margin-top: 3px; }
   .champion-banner .cb-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: -1px; }
+  .champion-banner .cb-badge {
+    margin-left: auto; text-align: center; flex: none;
+    border-left: 1px solid var(--border); padding-left: 20px;
+  }
+  .champion-banner .cb-badge .cb-badge-value { font-family: "Oswald", sans-serif; font-size: 26px; font-weight: 600; }
+  .champion-banner .cb-badge .cb-badge-label { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; max-width: 14ch; }
 
   /* ---------- section headings ---------- */
   section { margin-bottom: 40px; }
@@ -197,29 +257,65 @@
   .meter > span { display: block; height: 100%; background: var(--prob); border-radius: 3px 0 0 3px; }
   .odds-pct { width: 34px; text-align: right; font-size: 12px; color: var(--ink-2); }
 
-  .cutline-label {
-    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3);
-    text-align: center; padding: 3px 0; background: var(--surface-2);
-  }
-
   /* ---------- bracket ---------- */
   .bracket-scroll { overflow-x: auto; border-radius: 14px; }
   .bracket-scroll svg { display: block; min-width: 980px; width: 100%; height: auto; }
 
   .bnode-box { fill: var(--surface); stroke: var(--border); }
+  .bnode-box.projected { stroke-dasharray: 3 3; }
   .bnode-name { font-family: "IBM Plex Sans", sans-serif; font-size: 12.5px; fill: var(--ink); }
   .bnode-name.loser { fill: var(--ink-3); }
   .bnode-seed { font-family: "Oswald", sans-serif; font-size: 10.5px; fill: var(--ink-3); }
   .bnode-seed.loser { fill: var(--ink-3); opacity: 0.6; }
   .bconn { stroke: var(--border); stroke-width: 1.5; fill: none; }
+  .bconn.projected { stroke-dasharray: 4 3; }
   .bprob { font-family: "IBM Plex Sans", sans-serif; font-size: 10px; fill: var(--ink-3); }
-  .bupset { fill: var(--status-upset); font-weight: 600; }
+  .bupset { fill: var(--status-bad); font-weight: 600; }
   .conf-label { font-family: "Oswald", sans-serif; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
   .conf-label.east { fill: var(--accent-east); }
   .conf-label.west { fill: var(--accent-west); }
   .conf-label.finals { fill: var(--prob); }
   .finals-box { fill: var(--surface); stroke: var(--prob); stroke-width: 1.5; }
+  .finals-box.projected { stroke-dasharray: 3 3; }
   .champ-crown { fill: var(--prob); }
+
+  /* ---------- accuracy panel ---------- */
+  .accuracy-panel {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 24px; box-shadow: var(--shadow); margin-bottom: 18px;
+  }
+  .acc-headline { flex: none; text-align: center; min-width: 130px; }
+  .acc-headline .acc-value { font-family: "Oswald", sans-serif; font-size: 34px; font-weight: 600; }
+  .acc-headline .acc-band {
+    display: inline-block; margin-top: 4px; padding: 2px 9px; border-radius: 999px;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .acc-headline .acc-caption { margin-top: 6px; font-size: 11px; color: var(--ink-3); max-width: 20ch; }
+  .acc-breakdown { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 9px; justify-content: center; }
+  .acc-row { display: flex; align-items: center; gap: 10px; font-size: 12.5px; }
+  .acc-row .acc-row-label { width: 190px; color: var(--ink-2); flex: none; }
+  .acc-row .meter { width: 90px; }
+  .acc-row .acc-row-val { width: 40px; text-align: right; color: var(--ink-2); }
+  .acc-note { font-size: 12px; color: var(--ink-3); max-width: 60ch; margin: 10px 0 0; }
+
+  /* ---------- comparison table ---------- */
+  .comparison-wrap { overflow-x: auto; border-radius: 14px; }
+  table.comparison {
+    width: 100%; min-width: 720px; border-collapse: collapse; font-size: 12.5px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+  }
+  table.comparison th, table.comparison td { padding: 8px 12px; text-align: right; white-space: nowrap; }
+  table.comparison th {
+    font-family: "Oswald", sans-serif; font-weight: 500; font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--border); background: var(--surface-2);
+  }
+  table.comparison td.team-col, table.comparison th.team-col { text-align: left; }
+  table.comparison tbody tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+  table.comparison tr:hover td { background: var(--surface-2); }
+  .hit-yes { color: var(--status-good); font-weight: 600; }
+  .hit-no { color: var(--status-bad); }
+  .champ-flag { font-weight: 700; color: var(--prob); }
 
   /* ---------- footer ---------- */
   footer { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 8px; }
@@ -240,19 +336,43 @@
     <div>
       <span class="eyebrow" id="season-eyebrow">Season</span>
       <h1>Playoff Power Rankings</h1>
-      <p class="subtitle">Regular-season standings and a full postseason bracket, generated by the ensemble model: composite team ratings, injury-adjusted, cross-checked against a 10,000-run Monte Carlo bracket simulation.</p>
+      <p class="subtitle">Pick any modeled season, historical or future: standings in the familiar seed/W-L/PCT/GB format, a full postseason bracket, and how the model's own accuracy is tracking.</p>
     </div>
     <div class="head-meta">
-      <span class="eyebrow">Model season</span>
+      <span class="eyebrow">Viewing</span>
       <div class="season" id="season-label">—</div>
     </div>
   </header>
+
+  <div class="season-picker">
+    <div class="picker-group">
+      <label class="eyebrow" for="historical-select">Historical seasons</label>
+      <select id="historical-select"></select>
+    </div>
+    <div class="picker-group">
+      <label class="eyebrow" for="future-input">Project a future season</label>
+      <div class="future-form">
+        <input type="number" id="future-input" inputmode="numeric">
+        <button id="future-go" type="button">Project</button>
+      </div>
+      <div class="future-hint" id="future-hint"></div>
+    </div>
+  </div>
+
+  <div class="mode-banner" id="mode-banner">
+    <svg class="mb-icon" viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M10 2 L18.5 17 H1.5 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      <line x1="10" y1="8" x2="10" y2="12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="10" cy="14.5" r="0.9" fill="currentColor"/>
+    </svg>
+    <span id="mode-banner-text"></span>
+  </div>
 
   <div class="champion-banner" id="champion-banner"></div>
 
   <section id="standings-section">
     <div class="section-head">
-      <h2>Regular Season Standings</h2>
+      <h2 id="standings-title">Regular Season Standings</h2>
       <span class="section-note">Seed &middot; W&ndash;L &middot; PCT &middot; GB &middot; Net Rtg &middot; Playoff Odds</span>
     </div>
     <div class="standings-grid" id="standings-grid"></div>
@@ -260,17 +380,26 @@
 
   <section id="bracket-section">
     <div class="section-head">
-      <h2>Playoff Bracket</h2>
-      <span class="section-note">Win probability shown is the model's estimate for the series' actual winner</span>
+      <h2 id="bracket-title">Playoff Bracket</h2>
+      <span class="section-note" id="bracket-note">Win probability shown is the model's estimate for the series' actual winner</span>
     </div>
     <div class="bracket-scroll">
       <svg id="bracket-svg" viewBox="0 0 1400 460" role="img" aria-label="NBA-style playoff bracket showing each round's winner and the model's win probability for that series"></svg>
     </div>
   </section>
 
+  <section id="accuracy-section">
+    <div class="section-head">
+      <h2 id="accuracy-title">Model Accuracy</h2>
+      <span class="section-note" id="accuracy-note"></span>
+    </div>
+    <div class="accuracy-panel" id="accuracy-panel"></div>
+    <div class="comparison-wrap" id="comparison-wrap"></div>
+  </section>
+
   <footer>
     <div class="metrics-row" id="metrics-row"></div>
-    <p class="methodology-note">Model metrics reflect out-of-sample seasons held out of training. Standings, ratings, and bracket results come from the project's synthetic league generator (an internally-consistent stand-in for real box scores) &mdash; see the project README for methodology and how to point this at live data.</p>
+    <p class="methodology-note">Headline metrics reflect out-of-sample seasons held out of training. Every season's standings, ratings, and predictions come from a genuine walk-forward retrain (only strictly-earlier seasons in the training set) &mdash; see the project README for methodology and how to point this at live data.</p>
   </footer>
 </div>
 
@@ -278,40 +407,111 @@
 <script>
 (function () {
   const DATA = JSON.parse(document.getElementById("dashboard-data").textContent);
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const svg = document.getElementById("bracket-svg");
+  const BOX_W = 148, BOX_H = 40;
 
-  function teamMeta(abbr) {
-    return DATA.teams[abbr] || { name: abbr, color: "#999999" };
-  }
-
+  function teamMeta(abbr) { return DATA.teams[abbr] || { name: abbr, color: "#999999" }; }
   function pct(x) { return Math.round(x * 100) + "%"; }
-
-  function dot(abbr) {
-    return `<span class="dot" style="background:${teamMeta(abbr).color}"></span>`;
+  function dot(abbr) { return `<span class="dot" style="background:${teamMeta(abbr).color}"></span>`; }
+  function el(tag, attrs) {
+    const e = document.createElementNS(SVG_NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
   }
 
-  // ---------------- header ----------------
-  document.getElementById("season-eyebrow").textContent = DATA.season + " Season";
-  document.getElementById("season-label").textContent = DATA.season;
+  function confidenceBand(score) {
+    if (score >= 0.80) return { label: "High Confidence", tone: "good" };
+    if (score >= 0.65) return { label: "Moderate Confidence", tone: "warn" };
+    if (score >= 0.50) return { label: "Low Confidence", tone: "warn" };
+    return { label: "Speculative", tone: "bad" };
+  }
 
-  // ---------------- champion banner ----------------
-  (function renderBanner() {
-    const champ = DATA.bracket.finals.winner;
+  // ================= season picker =================
+  const histSelect = document.getElementById("historical-select");
+  const futureInput = document.getElementById("future-input");
+  const futureGo = document.getElementById("future-go");
+  const futureHint = document.getElementById("future-hint");
+
+  const allYears = Object.keys(DATA.years).map(Number).sort((a, b) => a - b);
+  const historicalYears = allYears.filter((y) => y <= DATA.present_year);
+  const futureMin = DATA.present_year + 1, futureMax = DATA.max_year;
+
+  historicalYears.slice().reverse().forEach((y) => {
+    const opt = document.createElement("option");
+    opt.value = y;
+    opt.textContent = DATA.years[y].season;
+    histSelect.appendChild(opt);
+  });
+  histSelect.value = DATA.present_year;
+
+  futureInput.min = futureMin;
+  futureInput.max = futureMax;
+  futureInput.placeholder = `${futureMin}–${futureMax}`;
+  futureHint.textContent = `Supported range: ${futureMin}–${futureMax}. Confidence declines the further out you go.`;
+
+  histSelect.addEventListener("change", () => renderYear(Number(histSelect.value)));
+  futureGo.addEventListener("click", submitFutureYear);
+  futureInput.addEventListener("keydown", (e) => { if (e.key === "Enter") submitFutureYear(); });
+
+  function submitFutureYear() {
+    const raw = futureInput.value.trim();
+    const year = Number(raw);
+    if (!raw || !Number.isInteger(year)) {
+      futureHint.textContent = "Enter a whole number year.";
+      futureHint.classList.add("error");
+      return;
+    }
+    if (year < futureMin || year > futureMax) {
+      futureHint.textContent = `Out of range — pick between ${futureMin} and ${futureMax}.`;
+      futureHint.classList.add("error");
+      return;
+    }
+    futureHint.classList.remove("error");
+    futureHint.textContent = `Supported range: ${futureMin}–${futureMax}. Confidence declines the further out you go.`;
+    renderYear(year);
+  }
+
+  // ================= champion banner =================
+  function renderBanner(yearData) {
+    const champ = yearData.champion;
     const meta = teamMeta(champ);
+    const finals = yearData.bracket.finals;
     const banner = document.getElementById("champion-banner");
+    const label = yearData.historical ? "Champion" : "Projected Favorite";
+    const verb = yearData.historical ? "Won the Finals with a model-estimated" : "Projected to win the Finals with an estimated";
     banner.innerHTML = `
       <svg class="laurel" viewBox="0 0 48 48" aria-hidden="true">
         <path d="M24 6 L28 18 L40 18 L30 26 L34 38 L24 30 L14 38 L18 26 L8 18 L20 18 Z" fill="currentColor"/>
       </svg>
       <div class="cb-text">
-        <span class="eyebrow">${DATA.season} Champion</span>
+        <span class="eyebrow">${yearData.season} ${label}</span>
         <h2><span class="cb-dot" style="background:${meta.color}"></span>${meta.name}</h2>
-        <div class="cb-sub">Won the Finals with a model-estimated ${pct(DATA.bracket.finals.winner_prob)} series probability</div>
+        <div class="cb-sub">${verb} ${pct(finals.winner_prob)} series probability</div>
+      </div>
+      <div class="cb-badge">
+        <div class="cb-badge-value">${pct(yearData.accuracy.score)}</div>
+        <div class="cb-badge-label">${yearData.historical ? "Measured Accuracy" : "Estimated Confidence"}</div>
       </div>`;
-  })();
+  }
 
-  // ---------------- standings ----------------
-  function renderConference(conf) {
-    const rows = DATA.standings[conf];
+  // ================= mode banner =================
+  function renderModeBanner(yearData) {
+    const banner = document.getElementById("mode-banner");
+    const text = document.getElementById("mode-banner-text");
+    if (yearData.historical) {
+      banner.classList.remove("visible");
+      return;
+    }
+    const yearsOut = yearData.year - DATA.present_year;
+    banner.classList.add("visible");
+    text.innerHTML = `This is a <strong>projection</strong>, ${yearsOut} season${yearsOut === 1 ? "" : "s"} beyond the last completed year (${DATA.present_year}). ` +
+      `No actual result exists to compare against — rosters, injuries, trades, and rookie classes that far out are unknown, so confidence is an estimate that decays with distance, not a measured accuracy.`;
+  }
+
+  // ================= standings =================
+  function renderConference(conf, yearData) {
+    const rows = yearData.standings[conf];
     const trs = rows.map((r, i) => {
       const meta = teamMeta(r.team);
       const cutline = i === 7 ? "cutline" : "";
@@ -352,40 +552,27 @@
       </div>`;
   }
 
-  document.getElementById("standings-grid").innerHTML =
-    renderConference("East") + renderConference("West");
-
-  // ---------------- bracket (SVG built programmatically) ----------------
-  const SVG_NS = "http://www.w3.org/2000/svg";
-  const svg = document.getElementById("bracket-svg");
-  const BOX_W = 148, BOX_H = 40, ROW_GAP = 6;
-
-  function el(tag, attrs) {
-    const e = document.createElementNS(SVG_NS, tag);
-    for (const k in attrs) e.setAttribute(k, attrs[k]);
-    return e;
+  function renderStandings(yearData) {
+    document.getElementById("standings-title").textContent =
+      yearData.historical ? "Regular Season Standings" : "Projected Standings";
+    document.getElementById("standings-grid").innerHTML =
+      renderConference("East", yearData) + renderConference("West", yearData);
   }
 
-  function drawNode(x, y, node, align) {
+  // ================= bracket =================
+  function drawNode(x, y, node, align, projected) {
     const g = el("g", {});
-    g.appendChild(el("rect", { x, y, width: BOX_W, height: BOX_H, rx: 6, class: "bnode-box" }));
-    const teams = [
-      { abbr: node.teamA, seed: node.seedA },
-      { abbr: node.teamB, seed: node.seedB },
-    ];
+    g.appendChild(el("rect", { x, y, width: BOX_W, height: BOX_H, rx: 6, class: "bnode-box" + (projected ? " projected" : "") }));
+    const teams = [{ abbr: node.teamA, seed: node.seedA }, { abbr: node.teamB, seed: node.seedB }];
     teams.forEach((t, i) => {
       const rowY = y + 14 + i * 18;
       const isWinner = t.abbr === node.winner;
       const cls = isWinner ? "" : " loser";
       let dotX, nameX, seedTextX;
       if (align === "right") {
-        seedTextX = x + BOX_W - 10;
-        dotX = x + BOX_W - 26;
-        nameX = x + BOX_W - 34;
+        seedTextX = x + BOX_W - 10; dotX = x + BOX_W - 26; nameX = x + BOX_W - 34;
       } else {
-        seedTextX = x + 10;
-        dotX = x + 26;
-        nameX = x + 34;
+        seedTextX = x + 10; dotX = x + 26; nameX = x + 34;
       }
       const seedT = el("text", { x: seedTextX, y: rowY, class: "bnode-seed" + cls, "text-anchor": align === "right" ? "end" : "start" });
       seedT.textContent = t.seed;
@@ -398,22 +585,21 @@
     svg.appendChild(g);
   }
 
-  function elbow(x1, y1, x2, y2) {
+  function elbow(x1, y1, x2, y2, projected) {
     const midX = (x1 + x2) / 2;
-    const path = `M ${x1} ${y1} H ${midX} V ${y2} H ${x2}`;
-    svg.appendChild(el("path", { d: path, class: "bconn" }));
+    svg.appendChild(el("path", { d: `M ${x1} ${y1} H ${midX} V ${y2} H ${x2}`, class: "bconn" + (projected ? " projected" : "") }));
   }
 
   function probLabel(x, y, node, align) {
-    const upset = node.winner_prob < 0.35;
+    const upset = !node.projected && node.winner_prob < 0.35;
     const anchor = align === "right" ? "end" : align === "center" ? "middle" : "start";
     const t = el("text", { x, y, class: "bprob" + (upset ? " bupset" : ""), "text-anchor": anchor });
-    t.textContent = (upset ? "UPSET · " : "") + Math.round(node.winner_prob * 100) + "% to win series";
+    const verb = node.projected ? "% projected to win" : "% to win series";
+    t.textContent = (upset ? "UPSET · " : "") + Math.round(node.winner_prob * 100) + verb;
     svg.appendChild(t);
   }
 
-  function layoutConference(bracket, side) {
-    // side: "left" (East) or "right" (West)
+  function layoutConference(bracket, side, projected) {
     const flip = side === "right";
     const colX = flip
       ? [1400 - 20 - BOX_W, 1400 - 20 - BOX_W * 2 - 40, 1400 - 20 - BOX_W * 3 - 80]
@@ -422,91 +608,175 @@
 
     const r1Ys = [40, 40 + BOX_H + 76, 40 + 2 * (BOX_H + 76), 40 + 3 * (BOX_H + 76)];
     bracket.round1.forEach((node, i) => {
-      drawNode(colX[0], r1Ys[i], node, align);
+      drawNode(colX[0], r1Ys[i], node, align, projected);
       probLabel(colX[0] + (flip ? BOX_W : 0), r1Ys[i] + BOX_H + 13, node, align);
     });
 
-    const semiYs = [
-      (r1Ys[0] + r1Ys[1]) / 2 + 30,
-      (r1Ys[2] + r1Ys[3]) / 2 + 30,
-    ];
+    const semiYs = [(r1Ys[0] + r1Ys[1]) / 2 + 30, (r1Ys[2] + r1Ys[3]) / 2 + 30];
     bracket.semis.forEach((node, i) => {
-      drawNode(colX[1], semiYs[i], node, align);
+      drawNode(colX[1], semiYs[i], node, align, projected);
       probLabel(colX[1] + (flip ? BOX_W : 0), semiYs[i] + BOX_H + 13, node, align);
     });
 
     const cfY = (semiYs[0] + semiYs[1]) / 2;
-    drawNode(colX[2], cfY, bracket.conf_finals, align);
+    drawNode(colX[2], cfY, bracket.conf_finals, align, projected);
     probLabel(colX[2] + (flip ? BOX_W : 0), cfY + BOX_H + 13, bracket.conf_finals, align);
 
-    // connectors: round1 -> semis
     r1Ys.forEach((y, i) => {
       const targetY = i < 2 ? semiYs[0] : semiYs[1];
       const x1 = flip ? colX[0] : colX[0] + BOX_W;
       const x2 = flip ? colX[1] + BOX_W : colX[1];
-      elbow(x1, y + BOX_H / 2, x2, targetY + BOX_H / 2);
+      elbow(x1, y + BOX_H / 2, x2, targetY + BOX_H / 2, projected);
     });
-    // semis -> conf finals
     semiYs.forEach((y) => {
       const x1 = flip ? colX[1] : colX[1] + BOX_W;
       const x2 = flip ? colX[2] + BOX_W : colX[2];
-      elbow(x1, y + BOX_H / 2, x2, cfY + BOX_H / 2);
+      elbow(x1, y + BOX_H / 2, x2, cfY + BOX_H / 2, projected);
     });
 
     return { x: colX[2], y: cfY };
   }
 
-  const eastAnchor = layoutConference(DATA.bracket.East, "left");
-  const westAnchor = layoutConference(DATA.bracket.West, "right");
+  function renderBracket(yearData) {
+    svg.innerHTML = "";
+    const projected = !yearData.historical;
+    document.getElementById("bracket-title").textContent = projected ? "Projected Playoff Bracket" : "Playoff Bracket";
+    document.getElementById("bracket-note").textContent = projected
+      ? "Dashed lines mark projected (not yet played) series — winner is the model's simulated favorite"
+      : "Win probability shown is the model's estimate for the series' actual winner";
 
-  // conference labels
-  const eastLabel = el("text", { x: 20, y: 20, class: "conf-label east" });
-  eastLabel.textContent = "Eastern Conference";
-  svg.appendChild(eastLabel);
-  const westLabel = el("text", { x: 1380, y: 20, class: "conf-label west", "text-anchor": "end" });
-  westLabel.textContent = "Western Conference";
-  svg.appendChild(westLabel);
+    const eastAnchor = layoutConference(yearData.bracket.East, "left", projected);
+    const westAnchor = layoutConference(yearData.bracket.West, "right", projected);
 
-  // Finals box, centered
-  const finalsY = (eastAnchor.y + westAnchor.y) / 2;
-  const finalsX = 700 - BOX_W / 2;
-  const finals = DATA.bracket.finals;
-  const finalsNode = { teamA: finals.teamEast, teamB: finals.teamWest, seedA: "E", seedB: "W", winner: finals.winner };
-  svg.appendChild(el("rect", { x: finalsX, y: finalsY, width: BOX_W, height: BOX_H, rx: 6, class: "finals-box" }));
-  [finals.teamEast, finals.teamWest].forEach((abbr, i) => {
-    const rowY = finalsY + 14 + i * 18;
-    const isWinner = abbr === finals.winner;
-    svg.appendChild(el("circle", { cx: finalsX + 20, cy: rowY - 4, r: 4, fill: teamMeta(abbr).color }));
-    const t = el("text", { x: finalsX + 28, y: rowY, class: "bnode-name" + (isWinner ? "" : " loser"), "font-weight": isWinner ? "600" : "400" });
-    t.textContent = abbr;
-    svg.appendChild(t);
-  });
-  const finalsLabel = el("text", { x: 700, y: finalsY - 12, class: "conf-label finals", "text-anchor": "middle" });
-  finalsLabel.textContent = "NBA Finals";
-  svg.appendChild(finalsLabel);
-  probLabel(700, finalsY + BOX_H + 15, finals, "center");
+    const eastLabel = el("text", { x: 20, y: 20, class: "conf-label east" });
+    eastLabel.textContent = "Eastern Conference";
+    svg.appendChild(eastLabel);
+    const westLabel = el("text", { x: 1380, y: 20, class: "conf-label west", "text-anchor": "end" });
+    westLabel.textContent = "Western Conference";
+    svg.appendChild(westLabel);
 
-  elbow(eastAnchor.x + BOX_W, eastAnchor.y + BOX_H / 2, finalsX, finalsY + BOX_H / 2 - 8);
-  elbow(westAnchor.x, westAnchor.y + BOX_H / 2, finalsX + BOX_W, finalsY + BOX_H / 2 + 8);
+    const finalsY = (eastAnchor.y + westAnchor.y) / 2;
+    const finalsX = 700 - BOX_W / 2;
+    const finals = yearData.bracket.finals;
+    svg.appendChild(el("rect", { x: finalsX, y: finalsY, width: BOX_W, height: BOX_H, rx: 6, class: "finals-box" + (projected ? " projected" : "") }));
+    [finals.teamEast, finals.teamWest].forEach((abbr, i) => {
+      const rowY = finalsY + 14 + i * 18;
+      const isWinner = abbr === finals.winner;
+      svg.appendChild(el("circle", { cx: finalsX + 20, cy: rowY - 4, r: 4, fill: teamMeta(abbr).color }));
+      const t = el("text", { x: finalsX + 28, y: rowY, class: "bnode-name" + (isWinner ? "" : " loser"), "font-weight": isWinner ? "600" : "400" });
+      t.textContent = abbr;
+      svg.appendChild(t);
+    });
+    const finalsLabel = el("text", { x: 700, y: finalsY - 12, class: "conf-label finals", "text-anchor": "middle" });
+    finalsLabel.textContent = "NBA Finals";
+    svg.appendChild(finalsLabel);
+    probLabel(700, finalsY + BOX_H + 15, finals, "center");
 
-  // Champion crown mark above the Finals box
-  const crownG = el("g", { transform: `translate(${700 - 9}, ${finalsY - 34})` });
-  crownG.appendChild(el("path", {
-    d: "M0 12 L3 2 L9 8 L14 -2 L19 8 L25 2 L28 12 Z",
-    class: "champ-crown",
-  }));
-  svg.appendChild(crownG);
+    elbow(eastAnchor.x + BOX_W, eastAnchor.y + BOX_H / 2, finalsX, finalsY + BOX_H / 2 - 8, projected);
+    elbow(westAnchor.x, westAnchor.y + BOX_H / 2, finalsX + BOX_W, finalsY + BOX_H / 2 + 8, projected);
 
-  // ---------------- metrics ----------------
-  const m = DATA.metrics;
-  const metrics = [
-    { label: "Made Playoffs · Accuracy", value: pct(m.made_playoffs.accuracy) },
-    { label: "Made Playoffs · ROC AUC", value: m.made_playoffs.roc_auc.toFixed(2) },
-    { label: "Rounds Won · Accuracy", value: pct(m.rounds_won.accuracy) },
-    { label: "Champion · ROC AUC", value: m.champion.roc_auc.toFixed(2) },
-  ];
-  document.getElementById("metrics-row").innerHTML = metrics.map(x =>
-    `<div class="metric"><div class="m-value">${x.value}</div><div class="m-label">${x.label}</div></div>`
-  ).join("");
+    const crownG = el("g", { transform: `translate(${700 - 9}, ${finalsY - 34})` });
+    crownG.appendChild(el("path", { d: "M0 12 L3 2 L9 8 L14 -2 L19 8 L25 2 L28 12 Z", class: "champ-crown" }));
+    svg.appendChild(crownG);
+  }
+
+  // ================= accuracy panel + comparison =================
+  function renderAccuracy(yearData) {
+    const a = yearData.accuracy;
+    const band = confidenceBand(a.score);
+    const panel = document.getElementById("accuracy-panel");
+    const noteEl = document.getElementById("accuracy-note");
+    const compWrap = document.getElementById("comparison-wrap");
+
+    if (yearData.historical) {
+      noteEl.textContent = "Genuine walk-forward prediction: trained only on strictly-earlier seasons";
+      panel.innerHTML = `
+        <div class="acc-headline">
+          <div class="acc-value">${pct(a.score)}</div>
+          <span class="acc-band" style="color:var(--status-${band.tone});background:var(--status-${band.tone}-soft)">${band.label}</span>
+          <div class="acc-caption">Measured against this season's actual results</div>
+        </div>
+        <div class="acc-breakdown">
+          <div class="acc-row"><span class="acc-row-label">Made-playoffs hit rate</span><span class="meter"><span style="width:${Math.round(a.playoff_hit_rate * 100)}%"></span></span><span class="acc-row-val">${pct(a.playoff_hit_rate)}</span></div>
+          <div class="acc-row"><span class="acc-row-label">Rounds-won closeness</span><span class="meter"><span style="width:${Math.round(a.rounds_closeness * 100)}%"></span></span><span class="acc-row-val">${pct(a.rounds_closeness)}</span></div>
+          <div class="acc-row"><span class="acc-row-label">Prob. assigned to actual champ</span><span class="meter"><span style="width:${Math.round(a.champion_prob_assigned * 100)}%"></span></span><span class="acc-row-val">${pct(a.champion_prob_assigned)}</span></div>
+        </div>`;
+
+      const rows = yearData.comparison.slice().sort((x, y) => x.seed - y.seed);
+      const trs = rows.map((r) => {
+        const meta = teamMeta(r.team);
+        return `
+          <tr>
+            <td class="team-col"><div class="team-cell">${dot(r.team)}<span class="team-abbr">${r.team}</span><span class="team-name">${meta.name}</span></div></td>
+            <td>${r.seed}</td>
+            <td>${pct(r.predicted_playoff_prob)}</td>
+            <td class="${r.actual_made_playoffs ? "hit-yes" : "hit-no"}">${r.actual_made_playoffs ? "Yes" : "No"}</td>
+            <td>${r.predicted_expected_rounds.toFixed(2)}</td>
+            <td>${r.actual_rounds_won}</td>
+            <td>${pct(r.predicted_champion_prob)}</td>
+            <td>${r.actual_champion ? '<span class="champ-flag">Champion</span>' : ""}</td>
+          </tr>`;
+      }).join("");
+      compWrap.innerHTML = `
+        <table class="comparison">
+          <thead><tr>
+            <th class="team-col">Team</th><th>Seed</th><th>Pred. Playoff%</th><th>Made Playoffs?</th>
+            <th>Pred. Rounds</th><th>Actual Rounds</th><th>Pred. Champ%</th><th>Result</th>
+          </tr></thead>
+          <tbody>${trs}</tbody>
+        </table>`;
+    } else {
+      noteEl.textContent = "No actual result exists yet — estimate only";
+      panel.innerHTML = `
+        <div class="acc-headline">
+          <div class="acc-value">${pct(a.score)}</div>
+          <span class="acc-band" style="color:var(--status-${band.tone});background:var(--status-${band.tone}-soft)">${band.label}</span>
+          <div class="acc-caption">Estimated, not measured</div>
+        </div>
+        <div class="acc-breakdown">
+          <p class="acc-note">This season hasn't happened, so there's nothing to score the prediction against yet.
+          The confidence above decays from the model's measured historical accuracy (${pct(DATA.baseline_accuracy)} on average)
+          by ${(yearData.year - DATA.present_year)} year${yearData.year - DATA.present_year === 1 ? "" : "s"} of compounding
+          uncertainty — unknown trades, injuries, rookie classes, and aging that far out. Check back with a historical
+          season to see the model graded against what actually happened.</p>
+        </div>`;
+      compWrap.innerHTML = "";
+    }
+  }
+
+  // ================= footer metrics (static, headline model) =================
+  function renderFooterMetrics() {
+    const m = DATA.metrics;
+    const metrics = [
+      { label: "Made Playoffs · Accuracy", value: pct(m.made_playoffs.accuracy) },
+      { label: "Made Playoffs · ROC AUC", value: m.made_playoffs.roc_auc.toFixed(2) },
+      { label: "Rounds Won · Accuracy", value: pct(m.rounds_won.accuracy) },
+      { label: "Champion · ROC AUC", value: m.champion.roc_auc.toFixed(2) },
+    ];
+    document.getElementById("metrics-row").innerHTML = metrics.map(x =>
+      `<div class="metric"><div class="m-value">${x.value}</div><div class="m-label">${x.label}</div></div>`
+    ).join("");
+  }
+
+  // ================= master render =================
+  function renderYear(year) {
+    const yearData = DATA.years[year];
+    if (!yearData) return;
+
+    document.getElementById("season-eyebrow").textContent = yearData.season + " Season";
+    document.getElementById("season-label").textContent = yearData.season + (yearData.historical ? "" : " (Projected)");
+
+    if (historicalYears.includes(year)) histSelect.value = year;
+    else futureInput.value = year;
+
+    renderModeBanner(yearData);
+    renderBanner(yearData);
+    renderStandings(yearData);
+    renderBracket(yearData);
+    renderAccuracy(yearData);
+  }
+
+  renderFooterMetrics();
+  renderYear(DATA.present_year);
 })();
 </script>

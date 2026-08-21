@@ -69,15 +69,29 @@ bracket simulation -- printed metrics plus these files in `output/`:
 python -m dashboard.build   # runs the pipeline, writes dashboard/index.html
 ```
 
-Produces a self-contained HTML page — conference standings in the familiar
-seed/W-L/PCT/GB format, plus a full playoff bracket (both conferences
-converging on the Finals) with the model's estimated win probability for
-every actual series, upsets flagged. Open `dashboard/index.html` directly in
-a browser. `dashboard/export_data.py` reconstructs the bracket from seeds +
-`rounds_won` (NBA brackets never re-seed, so the winner at each node is
-fully determined) and re-simulates each real matchup thousands of times for
-its probability; `dashboard/team_meta.py` holds team display names/colors;
-`dashboard/template.html` is the page itself.
+Produces a self-contained HTML page with a season picker covering every
+modeled year, 2002-03 through 10 seasons past the last historical season:
+
+- **Historical seasons** show the generator's actual outcome (standings,
+  bracket, champion) *and* a genuinely out-of-sample **walk-forward**
+  prediction — a model retrained on only the strictly-earlier seasons, so
+  the "Model Accuracy" panel and per-team comparison table are a real
+  model-vs-actual check, not a model grading its own homework.
+- **Future seasons** (type in any year in the supported range) show only
+  the model's projection — standings, a bracket built from simulated
+  favorites (dashed lines mark projected series), and a **confidence
+  rating that decays with distance** from the last historical season,
+  explicitly labeled as an estimate rather than a measured accuracy.
+
+`dashboard/export_data.py` runs `src.model.walk_forward_predictions` (one
+retrain per season, expanding window) to produce every year's prediction,
+`src.model.year_accuracy_summary` to score historical years, and
+`src.model.future_confidence` for the decay curve; brackets are
+reconstructed from seeds + `rounds_won` for history (NBA brackets never
+re-seed, so the winner at each node is fully determined) or from
+re-simulated matchups for projections. `dashboard/team_meta.py` holds team
+display names/colors; `dashboard/template.html` is the page itself. Full
+export (35 seasons, walk-forward retraining included) takes 1-2 minutes.
 
 ## Tests
 
