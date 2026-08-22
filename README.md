@@ -123,7 +123,13 @@ attempting a likeness.
 
 A separate **"Real NBA History"** panel (`dashboard/real_history.py`) shows
 the *actual* MVP and champion for each real season, 1982-83 through
-2023-24 — compiled from well-established public record, kept visually and
+2024-25 (Shai Gilgeous-Alexander won MVP and Finals MVP; Oklahoma City beat
+Indiana in 7 games) — the most recent real season with a confirmed outcome
+as of this project's knowledge cutoff. 2025-26 isn't included: it was
+still in progress at that cutoff, and this environment has no live network
+access to check it — see the "Real-World MVP Prediction" section instead
+for a clearly-labeled opinion/prediction about that season, not a claimed
+fact. Compiled from well-established public record, kept visually and
 structurally distinct from the model's own (entirely fictional) simulated
 season so the two are never confused. It ships with no real player photos
 (licensing them requires rights this project doesn't have); drop a

@@ -121,7 +121,7 @@ def _fit_all(X_train: pd.DataFrame, y_playoffs: pd.Series, y_rounds: pd.Series, 
     )
 
 
-def train_and_evaluate(ml_dataset: pd.DataFrame, test_years: tuple[int, ...] = (2022, 2023, 2024),
+def train_and_evaluate(ml_dataset: pd.DataFrame, test_years: tuple[int, ...] = (2023, 2024, 2025),
                         seed: int = RANDOM_SEED, feature_cols: list[str] = FEATURE_COLS) -> TrainedModels:
     train, test = time_based_split(ml_dataset, test_years)
     X_train, X_test = train[feature_cols], test[feature_cols]

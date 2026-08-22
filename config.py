@@ -16,7 +16,7 @@ RANDOM_SEED = 42
 # texture to work with (a pre-3pt Big Man Era through today's spacing game),
 # not just one 25-year window.
 START_SEASON_YEAR = 1980
-END_SEASON_YEAR = 2024
+END_SEASON_YEAR = 2025  # last real season with a known, confirmed outcome (2024-25)
 CURRENT_SEASON_YEAR = END_SEASON_YEAR
 
 # "Present" boundary: seasons up to here are treated as history (the

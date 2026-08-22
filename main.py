@@ -36,7 +36,7 @@ from src.team_strength import add_offcourt_factors, build_composite_ratings
 
 
 def run_pipeline(start_year: int = START_SEASON_YEAR, end_year: int = END_SEASON_YEAR,
-                  test_years: tuple[int, ...] = (2022, 2023, 2024), seed: int = RANDOM_SEED) -> dict:
+                  test_years: tuple[int, ...] = (2023, 2024, 2025), seed: int = RANDOM_SEED) -> dict:
     print(f"[1/7] Generating league data for {season_label(start_year)} .. {season_label(end_year)}...")
     league = generate_synthetic_league(start_year, end_year, seed=seed)
 

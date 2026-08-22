@@ -19,14 +19,22 @@ Real-world caveat: the actual MVP award is decided by a media panel (not
 fans) after the season ends. There is no official *MVP* fan vote to cite --
 real fan voting exists for the All-Star Game, a different award entirely --
 so "fan popularity" below is an honest qualitative cultural-impact proxy,
-not a real vote count. By the time anyone reads this, the real award for
-whatever season is in question may already be decided in ways this
-knowledge cutoff doesn't reflect -- treat this as a snapshot opinion, not
-a live prediction, and check an official source for the real outcome.
+not a real vote count.
+
+This predicts the **2025-26** season specifically: 2024-25 already has a
+real, confirmed outcome (Shai Gilgeous-Alexander won MVP and Finals MVP,
+Oklahoma City beat Indiana in 7 games -- see dashboard/real_history.py,
+where that now lives as settled fact, not a prediction). 2025-26 was still
+in progress as of this project's January 2026 knowledge cutoff, so its
+real outcome isn't yet knowable here. By the time anyone reads this, that
+real season may already be decided in ways this cutoff doesn't reflect --
+treat this as a snapshot opinion, not a live prediction, and check an
+official source for the real outcome.
 """
 from __future__ import annotations
 
 KNOWLEDGE_CUTOFF = "January 2026"
+PREDICTING_SEASON = "2025-26"
 
 WEIGHTS = {"performance": 0.55, "team_success": 0.20, "media_press": 0.15, "fan_popularity": 0.10}
 
@@ -36,9 +44,9 @@ CANDIDATES = [
     {
         "name": "Shai Gilgeous-Alexander", "team": "Oklahoma City Thunder", "position": "PG",
         "scores": {"performance": 9.5, "team_success": 9.0, "media_press": 8.0, "fan_popularity": 7.5},
-        "blurb": "Reigning real-world MVP as of this knowledge cutoff, anchoring the league's "
-                 "best young contender with elite scoring efficiency -- the same profile that "
-                 "won it, with no obvious drop-off signal.",
+        "blurb": "Won the real 2024-25 MVP and Finals MVP outright, anchoring the league's best "
+                 "young contender with elite scoring efficiency -- a repeat bid for 2025-26 with "
+                 "no obvious drop-off signal as of this knowledge cutoff.",
     },
     {
         "name": "Luka Doncic", "team": "Los Angeles Lakers", "position": "PG/SG",
@@ -105,6 +113,7 @@ def build_prediction() -> dict:
         })
     return {
         "knowledge_cutoff": KNOWLEDGE_CUTOFF,
+        "predicting_season": PREDICTING_SEASON,
         "weights": WEIGHTS,
         "candidates": rows,
         "predicted_mvp": rows[0]["name"],

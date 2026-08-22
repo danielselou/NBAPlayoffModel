@@ -10,7 +10,10 @@ strictly as a factual "here's what actually happened" reference.
 Compiled from widely-corroborated public record (award winners and NBA
 Finals results are about as well-established as sports trivia gets), keyed
 by season-ending year to match this project's `year` convention (e.g. 2016
-== the 2015-16 season, when Stephen Curry won a unanimous MVP). Treat as a
+== the 2015-16 season, when Stephen Curry won a unanimous MVP). Covers
+1979-80 through 2024-25 -- the most recent season with a real, confirmed
+outcome as of this project's January 2026 knowledge cutoff; 2025-26 isn't
+included; see the note by its (absent) dict entries below. Treat as a
 convenience reference, not an authoritative source -- verify independently
 before citing formally, and note gaps/uncertainty rather than guessing.
 
@@ -72,6 +75,12 @@ REAL_MVP: dict[int, dict[str, str]] = {
     2022: {"name": "Nikola Jokic", "team": "Denver Nuggets"},
     2023: {"name": "Joel Embiid", "team": "Philadelphia 76ers"},
     2024: {"name": "Nikola Jokic", "team": "Denver Nuggets"},
+    2025: {"name": "Shai Gilgeous-Alexander", "team": "Oklahoma City Thunder", "note": "Also Finals MVP"},
+    # 2026 (2025-26 season) intentionally omitted: this project's knowledge
+    # cutoff (January 2026) predates that season's conclusion, and this
+    # environment has no live network access to check whether/how it's
+    # been decided -- see dashboard/real_mvp_prediction.py for a labeled
+    # opinion/prediction instead of a fabricated "fact" here.
 }
 
 REAL_CHAMPION: dict[int, str] = {
@@ -90,6 +99,7 @@ REAL_CHAMPION: dict[int, str] = {
     2016: "Cleveland Cavaliers", 2017: "Golden State Warriors", 2018: "Golden State Warriors",
     2019: "Toronto Raptors", 2020: "Los Angeles Lakers", 2021: "Milwaukee Bucks",
     2022: "Golden State Warriors", 2023: "Denver Nuggets", 2024: "Boston Celtics",
+    2025: "Oklahoma City Thunder",  # beat the Indiana Pacers in 7 games
 }
 
 ASSET_DIR = Path(__file__).parent / "assets" / "real_mvps"

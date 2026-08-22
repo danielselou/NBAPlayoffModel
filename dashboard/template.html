@@ -471,7 +471,7 @@
 
   <section id="real-mvp-prediction-section">
     <div class="section-head">
-      <h2>Real-World MVP Prediction</h2>
+      <h2 id="rmp-title">Real-World MVP Prediction</h2>
       <span class="section-note reveal">Claude's own analysis of real, current NBA players &mdash; independent of the synthetic season picker below</span>
     </div>
     <div class="rmp-card" id="rmp-card"></div>
@@ -1097,9 +1097,10 @@
         <span class="rmp-row-total">${c.total_pct}%</span>
       </div>`).join("");
 
+    document.getElementById("rmp-title").textContent = `Real-World MVP Prediction — ${p.predicting_season}`;
     document.getElementById("rmp-card").innerHTML = `
       <div class="rmp-winner">
-        <span class="eyebrow">Predicted MVP</span>
+        <span class="eyebrow">Predicted ${p.predicting_season} MVP</span>
         <h3>${winner.name}</h3>
         <div class="rmp-team">${winner.team} &middot; ${winner.position}</div>
         <div class="rmp-pct">${winner.total_pct}%</div>
@@ -1112,9 +1113,10 @@
       `Formula: ${Math.round(w.performance * 100)}% performance + ${Math.round(w.team_success * 100)}% team success + ` +
       `${Math.round(w.media_press * 100)}% media press + ${Math.round(w.fan_popularity * 100)}% fan popularity/cultural impact ` +
       `(each candidate's 0-10 scores are Claude's own qualitative judgment, not sourced statistics or an official poll -- ` +
-      `there is no official MVP fan vote in real life; MVP is media-panel voted). Knowledge cutoff: ${p.knowledge_cutoff}. ` +
-      `This is a snapshot opinion, not a live prediction -- the real award may already be decided by the time you're reading this. ` +
-      `Check an official source for the actual outcome.`;
+      `there is no official MVP fan vote in real life; MVP is media-panel voted). Knowledge cutoff: ${p.knowledge_cutoff}, ` +
+      `while the ${p.predicting_season} season was still in progress. This is a snapshot opinion, not a live prediction -- ` +
+      `that real season may already be decided by the time you're reading this. Check an official source for the actual outcome. ` +
+      `(2024-25 already has a real, confirmed MVP and champion -- see the Real NBA History panel for the season you're viewing below.)`;
   }
 
   renderFooterMetrics();
