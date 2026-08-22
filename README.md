@@ -136,6 +136,19 @@ section mapping every library and stat/formula on the page to where it's
 actually used — the same mapping as the table above, surfaced for anyone
 looking at the dashboard itself rather than this file.
 
+A third, standalone section — **"Real-World MVP Prediction"**
+(`dashboard/real_mvp_prediction.py`) — is independent of the season picker
+entirely: a real, current NBA player, ranked by a transparent rubric (55%
+performance / 20% team success / 15% media press / 10% fan popularity),
+where every 0-10 score is Claude's own qualitative judgment from general
+basketball knowledge, not a database lookup or sourced statistic (there's
+no real per-player data anywhere in this project to compute one from — see
+Honest limitations). It's presented as a snapshot opinion with an explicit
+knowledge-cutoff date, not a live prediction, and it corrects a common
+misconception in-page: real MVP voting has no official fan-vote component
+(that's the All-Star Game); "fan popularity" here is an honest
+cultural-impact proxy, not a cited poll.
+
 ## Tests
 
 ```bash

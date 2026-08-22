@@ -38,6 +38,7 @@ from config import (
 from dashboard.player_names import jersey_number, player_name
 from dashboard.portrait import generate_portrait_data_uri
 from dashboard.real_history import REAL_CHAMPION, REAL_MVP, real_mvp_image_data_uri
+from dashboard.real_mvp_prediction import build_prediction as build_real_mvp_prediction
 from dashboard.team_meta import TEAM_META
 from src.data_collection import generate_synthetic_league, season_label
 from src.era import era_big_man_weight, era_guard_weight, era_name
@@ -398,6 +399,7 @@ def export(output_path: Path = Path(__file__).parent / "data.json") -> dict:
         "baseline_accuracy": round(baseline_accuracy, 3),
         "metrics": headline.metrics,
         "era_accuracy": era_accuracy,
+        "real_mvp_prediction": build_real_mvp_prediction(),
         "teams": teams_meta,
         "years": years_payload,
     }

@@ -395,6 +395,32 @@
   .real-history-row .rh-team { font-size: 12px; color: var(--ink-2); }
   .real-history-caption { flex: 1 1 100%; font-size: 11px; color: var(--ink-3); margin-top: 8px; }
 
+  /* ---------- real-world MVP prediction ---------- */
+  .rmp-card {
+    display: grid; grid-template-columns: 240px 1fr; gap: 24px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 26px; box-shadow: var(--shadow);
+  }
+  @media (max-width: 760px) { .rmp-card { grid-template-columns: 1fr; } }
+  .rmp-winner { border-right: 1px solid var(--border); padding-right: 22px; }
+  @media (max-width: 760px) { .rmp-winner { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; padding-bottom: 18px; } }
+  .rmp-winner h3 { font-size: 22px; margin-top: 4px; }
+  .rmp-winner .rmp-team { font-size: 12.5px; color: var(--ink-2); margin-top: 2px; }
+  .rmp-winner .rmp-pct { font-family: "Oswald", sans-serif; font-size: 30px; font-weight: 600; color: var(--prob); margin-top: 10px; }
+  .rmp-winner .rmp-blurb { font-size: 12px; color: var(--ink-3); margin-top: 8px; }
+  .rmp-list { display: flex; flex-direction: column; gap: 9px; }
+  .rmp-row { display: grid; grid-template-columns: 20px 1fr 52px; align-items: center; gap: 10px; font-size: 12.5px; }
+  .rmp-row.rank-1 .rmp-row-name { font-weight: 600; }
+  .rmp-rank { color: var(--ink-3); font-family: "Oswald", sans-serif; }
+  .rmp-row-name { color: var(--ink); }
+  .rmp-row-team { color: var(--ink-3); font-weight: 400; font-size: 11px; }
+  .rmp-row-scores { display: flex; gap: 10px; font-size: 10.5px; color: var(--ink-3); margin-top: 1px; }
+  .rmp-row-total { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .rmp-disclaimer {
+    font-size: 11.5px; color: var(--ink-3); max-width: 84ch; margin-top: 12px;
+    background: var(--surface-2); border-radius: 10px; padding: 10px 14px;
+  }
+
   /* ---------- era accuracy ---------- */
   .era-acc-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
   .era-acc-row { display: grid; grid-template-columns: 170px 1fr 50px 70px; align-items: center; gap: 10px; font-size: 12.5px; }
@@ -442,6 +468,15 @@
       <span class="era-tag" id="era-tag"></span>
     </div>
   </header>
+
+  <section id="real-mvp-prediction-section">
+    <div class="section-head">
+      <h2>Real-World MVP Prediction</h2>
+      <span class="section-note reveal">Claude's own analysis of real, current NBA players &mdash; independent of the synthetic season picker below</span>
+    </div>
+    <div class="rmp-card" id="rmp-card"></div>
+    <p class="rmp-disclaimer reveal" id="rmp-disclaimer"></p>
+  </section>
 
   <div class="season-picker">
     <div class="picker-group">
@@ -1042,9 +1077,50 @@
     initScrollReveal();
   }
 
+  // ================= real-world MVP prediction (static) =================
+  function renderRealMvpPrediction() {
+    const p = DATA.real_mvp_prediction;
+    if (!p) { document.getElementById("real-mvp-prediction-section").style.display = "none"; return; }
+    const winner = p.candidates[0];
+    const rest = p.candidates.slice(0).map((c, i) => `
+      <div class="rmp-row ${i === 0 ? "rank-1" : ""}">
+        <span class="rmp-rank">${i + 1}</span>
+        <div>
+          <span class="rmp-row-name">${c.name} <span class="rmp-row-team">${c.team} &middot; ${c.position}</span></span>
+          <div class="rmp-row-scores">
+            <span>Perf ${c.scores.performance}</span>
+            <span>Team ${c.scores.team_success}</span>
+            <span>Media ${c.scores.media_press}</span>
+            <span>Fan ${c.scores.fan_popularity}</span>
+          </div>
+        </div>
+        <span class="rmp-row-total">${c.total_pct}%</span>
+      </div>`).join("");
+
+    document.getElementById("rmp-card").innerHTML = `
+      <div class="rmp-winner">
+        <span class="eyebrow">Predicted MVP</span>
+        <h3>${winner.name}</h3>
+        <div class="rmp-team">${winner.team} &middot; ${winner.position}</div>
+        <div class="rmp-pct">${winner.total_pct}%</div>
+        <p class="rmp-blurb">${winner.blurb}</p>
+      </div>
+      <div class="rmp-list">${rest}</div>`;
+
+    const w = p.weights;
+    document.getElementById("rmp-disclaimer").innerHTML =
+      `Formula: ${Math.round(w.performance * 100)}% performance + ${Math.round(w.team_success * 100)}% team success + ` +
+      `${Math.round(w.media_press * 100)}% media press + ${Math.round(w.fan_popularity * 100)}% fan popularity/cultural impact ` +
+      `(each candidate's 0-10 scores are Claude's own qualitative judgment, not sourced statistics or an official poll -- ` +
+      `there is no official MVP fan vote in real life; MVP is media-panel voted). Knowledge cutoff: ${p.knowledge_cutoff}. ` +
+      `This is a snapshot opinion, not a live prediction -- the real award may already be decided by the time you're reading this. ` +
+      `Check an official source for the actual outcome.`;
+  }
+
   renderFooterMetrics();
   renderMethodologyGrids();
   renderEraAccuracy();
+  renderRealMvpPrediction();
   renderYear(DATA.present_year);
 })();
 </script>
