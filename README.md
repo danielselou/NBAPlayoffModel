@@ -93,6 +93,23 @@ re-simulated matchups for projections. `dashboard/team_meta.py` holds team
 display names/colors; `dashboard/template.html` is the page itself. Full
 export (35 seasons, walk-forward retraining included) takes 1-2 minutes.
 
+Each season also gets a **Season MVP** card: `dashboard/export_data.py`
+scores every rotation player (≥28 min/game) with the same
+`era_adjusted_zscore` used throughout the pipeline, blending scoring,
+playmaking, rebounding, stocks, and shooting efficiency with team win% —
+descriptive, not predictive, so there's no look-ahead concern the way
+there is for the model's features. `dashboard/player_names.py` gives each
+synthetic player ID a stable fictional name; `dashboard/portrait.py` draws
+a small illustrated card (team-color gradient, silhouette, jersey number)
+with Pillow and embeds it as a PNG data URI — there's no real photo behind
+these players, so the card is deliberately abstract rather than
+attempting a likeness. The page also has scroll-triggered reveal
+animations on secondary text (respecting `prefers-reduced-motion`) and an
+in-page **"How This Works"** section mapping every library and stat/formula
+on the page to where it's actually used — the same mapping as the table
+above, surfaced for anyone looking at the dashboard itself rather than
+this file.
+
 ## Tests
 
 ```bash

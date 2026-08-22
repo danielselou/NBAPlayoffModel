@@ -329,6 +329,60 @@
   @media (prefers-reduced-motion: no-preference) {
     .team-row { transition: background-color 120ms ease; }
   }
+
+  /* ---------- scroll reveal ---------- */
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity 650ms ease, transform 650ms ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { transition: none; }
+  }
+
+  /* ---------- MVP card ---------- */
+  .mvp-card {
+    display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 24px; box-shadow: var(--shadow);
+  }
+  .mvp-portrait { flex: none; text-align: center; }
+  .mvp-info { flex: 1 1 240px; min-width: 0; }
+  .mvp-portrait img {
+    width: 128px; height: 160px; border-radius: 12px; display: block;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  }
+  .mvp-portrait-caption { font-size: 9.5px; color: var(--ink-3); max-width: 128px; margin-top: 6px; line-height: 1.3; }
+  .mvp-info h3 { font-size: 22px; display: flex; align-items: baseline; gap: 8px; }
+  .mvp-num { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-3); text-transform: none; letter-spacing: 0; }
+  .mvp-meta { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
+  .mvp-stat-row { display: flex; gap: 16px 22px; margin-top: 14px; flex-wrap: wrap; }
+  .mvp-stat { text-align: left; }
+  .mvp-stat-value { font-family: "Oswald", sans-serif; font-size: 20px; font-weight: 600; display: block; }
+  .mvp-stat-label { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .mvp-blurb { font-size: 12px; color: var(--ink-3); max-width: 62ch; margin: 14px 0 0; }
+
+  /* ---------- methodology / library grid ---------- */
+  .lib-grid, .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+  .stat-grid { margin-top: 14px; }
+  .lib-card, .stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; box-shadow: var(--shadow);
+  }
+  .lib-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .lib-badge {
+    font-family: "Oswald", sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.03em;
+    color: var(--prob); background: var(--prob-track); padding: 2px 8px; border-radius: 6px;
+  }
+  .lib-card h3, .stat-card h3 { font-size: 14px; }
+  .lib-card p, .stat-card p { font-size: 12px; color: var(--ink-2); margin: 6px 0 0; }
+  .formula {
+    display: inline-block; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+    font-size: 11px; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 3px 7px; margin-top: 8px; color: var(--ink); word-break: break-word;
+  }
+  .methodology-intro { color: var(--ink-2); font-size: 13px; max-width: 74ch; margin: 0 0 16px; }
+  .subsection-label {
+    font-family: "Oswald", sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-3); margin: 24px 0 12px;
+  }
 </style>
 
 <div class="wrap">
@@ -370,6 +424,14 @@
 
   <div class="champion-banner" id="champion-banner"></div>
 
+  <section id="mvp-section">
+    <div class="section-head">
+      <h2 id="mvp-title">Season MVP</h2>
+      <span class="section-note reveal">Era-adjusted z-scores on scoring, playmaking, rebounding &amp; efficiency, plus team win%</span>
+    </div>
+    <div class="mvp-card" id="mvp-card"></div>
+  </section>
+
   <section id="standings-section">
     <div class="section-head">
       <h2 id="standings-title">Regular Season Standings</h2>
@@ -397,9 +459,22 @@
     <div class="comparison-wrap" id="comparison-wrap"></div>
   </section>
 
+  <section id="methodology-section">
+    <div class="section-head">
+      <h2>How This Works</h2>
+    </div>
+    <p class="methodology-intro reveal">Every number on this page traces back to a specific library and a specific formula &mdash; not a black box. Here's where each one shows up.</p>
+
+    <div class="subsection-label reveal">Libraries</div>
+    <div class="lib-grid" id="lib-grid"></div>
+
+    <div class="subsection-label reveal">Stats &amp; Formulas</div>
+    <div class="stat-grid" id="stat-grid"></div>
+  </section>
+
   <footer>
     <div class="metrics-row" id="metrics-row"></div>
-    <p class="methodology-note">Headline metrics reflect out-of-sample seasons held out of training. Every season's standings, ratings, and predictions come from a genuine walk-forward retrain (only strictly-earlier seasons in the training set) &mdash; see the project README for methodology and how to point this at live data.</p>
+    <p class="methodology-note reveal">Headline metrics reflect out-of-sample seasons held out of training. Every season's standings, ratings, and predictions come from a genuine walk-forward retrain (only strictly-earlier seasons in the training set) &mdash; see the project README for full methodology and how to point this at live data.</p>
   </footer>
 </div>
 
@@ -744,6 +819,87 @@
     }
   }
 
+  // ================= MVP highlight =================
+  function renderMvp(yearData) {
+    const section = document.getElementById("mvp-section");
+    const mvp = yearData.mvp;
+    document.getElementById("mvp-title").textContent = yearData.historical ? "Season MVP" : "Projected Season MVP";
+    if (!mvp) { section.style.display = "none"; return; }
+    section.style.display = "";
+    const meta = teamMeta(mvp.team);
+    document.getElementById("mvp-card").innerHTML = `
+      <div class="mvp-portrait">
+        <img src="${mvp.portrait}" width="128" height="160" alt="Illustrated player card for ${mvp.name}, #${mvp.jersey_number}">
+        <div class="mvp-portrait-caption reveal">Illustrated card &mdash; a fictional player, not a real photo</div>
+      </div>
+      <div class="mvp-info">
+        <span class="eyebrow">${yearData.season}${yearData.historical ? "" : " (Projected)"} MVP</span>
+        <h3>${mvp.name} <span class="mvp-num">#${mvp.jersey_number}</span></h3>
+        <div class="mvp-meta">${dot(mvp.team)}${meta.name} &middot; ${mvp.position} &middot; Age ${mvp.age}</div>
+        <div class="mvp-stat-row">
+          <div class="mvp-stat"><span class="mvp-stat-value">${mvp.stats.pts_per36}</span><span class="mvp-stat-label">Pts/36</span></div>
+          <div class="mvp-stat"><span class="mvp-stat-value">${mvp.stats.reb_per36}</span><span class="mvp-stat-label">Reb/36</span></div>
+          <div class="mvp-stat"><span class="mvp-stat-value">${mvp.stats.ast_per36}</span><span class="mvp-stat-label">Ast/36</span></div>
+          <div class="mvp-stat"><span class="mvp-stat-value">${(mvp.stats.stl_per36 + mvp.stats.blk_per36).toFixed(1)}</span><span class="mvp-stat-label">Stocks/36</span></div>
+          <div class="mvp-stat"><span class="mvp-stat-value">${(mvp.stats.ts_pct * 100).toFixed(1)}%</span><span class="mvp-stat-label">TS%</span></div>
+        </div>
+        <p class="mvp-blurb reveal">Selected with the same era-adjusted z-score methodology (<code>src/features.era_adjusted_zscore</code>) used for every rating on this page: scoring, playmaking, rebounding, and stocks (steals+blocks) z-scored against that season's league, blended with shooting efficiency and team win% &mdash; not the model's hidden skill rating, just box-score stats a voter could see.</p>
+      </div>`;
+  }
+
+  // ================= static library / stats glossary =================
+  function renderMethodologyGrids() {
+    const libs = [
+      { badge: "pandas", title: "Every table on this page", body: "Standings, the comparison table, the MVP pool -- all pandas DataFrames. <code class=\"formula\">groupby(\"season\")</code> computes the era-adjusted z-scores behind Net Rtg, MVP stats, and playoff-dropoff tendency." },
+      { badge: "NumPy", title: "The math underneath", body: "Vectorized arithmetic for the Pythagorean formula, the log5 win-probability logistic, and the random-number generator driving every walk-forward retrain and bracket simulation." },
+      { badge: "scikit-learn", title: "One-third of the ensemble", body: "LogisticRegression + RandomForestClassifier + StandardScaler, soft-voted with XGBoost, for the made-playoffs call on every team you see in the standings." },
+      { badge: "XGBoost", title: "Gradient-boosted trees", body: "Predicts made-playoffs, rounds-won (multiclass), and championship (rare-event, class-weighted) -- retrained from scratch for every single season shown here." },
+      { badge: "Pillow", title: "The MVP portrait", body: "Draws the gradient, silhouette, and jersey number for the illustrated player card above, server-side, embedded as a plain PNG -- no external image host." },
+      { badge: "nba_api", title: "Live data (optional)", body: "Can pull real box scores from stats.nba.com when reachable; this deployment runs on the synthetic league generator instead (see the README)." },
+    ];
+    document.getElementById("lib-grid").innerHTML = libs.map(l => `
+      <div class="lib-card reveal">
+        <div class="lib-card-head"><span class="lib-badge">${l.badge}</span></div>
+        <h3>${l.title}</h3>
+        <p>${l.body}</p>
+      </div>`).join("");
+
+    const stats = [
+      { name: "True Shooting %", formula: "PTS / (2 &times; (FGA + 0.44 &times; FTA))", body: "Shooting efficiency including free throws and the extra value of a three." },
+      { name: "Effective FG%", formula: "(FGM + 0.5 &times; 3PM) / FGA", body: "Field-goal% adjusted to credit threes at 1.5x a two." },
+      { name: "Four Factors", formula: "0.40&middot;eFG% &minus; 0.25&middot;TOV% + 0.20&middot;ORB% + 0.15&middot;FTRate", body: "Dean Oliver's weights for what actually predicts scoring margin." },
+      { name: "Pythagorean Win%", formula: "PF^13.91 / (PF^13.91 + PA^13.91)", body: "Basketball-Reference's point-differential win expectation." },
+      { name: "Simple Rating System", formula: "SRS = MOV + SOS", body: "Margin of victory adjusted for strength of schedule, solved iteratively." },
+      { name: "Era-Adjusted Z-Score", formula: "(x &minus; season mean) / season std", body: "The \"Era Ball\" adjustment: judges a stat against its own season, not face value across decades." },
+      { name: "log5 Win Probability", formula: "1 / (1 + 10^(&minus;&Delta;Rating / 19))", body: "Single-game win probability from a net-rating gap, &plusmn;3 pts home court." },
+      { name: "Net Rating", formula: "Off. Rating &minus; Def. Rating", body: "Points scored minus allowed per 100 possessions -- the backbone team-strength number." },
+    ];
+    document.getElementById("stat-grid").innerHTML = stats.map(s => `
+      <div class="stat-card reveal">
+        <h3>${s.name}</h3>
+        <p>${s.body}</p>
+        <span class="formula">${s.formula}</span>
+      </div>`).join("");
+  }
+
+  // ================= scroll reveal =================
+  let revealObserver = null;
+  function initScrollReveal() {
+    const targets = document.querySelectorAll(".reveal");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) { targets.forEach((t) => t.classList.add("visible")); return; }
+    if (revealObserver) revealObserver.disconnect();
+    revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -30px 0px" });
+    targets.forEach((t) => revealObserver.observe(t));
+  }
+
   // ================= footer metrics (static, headline model) =================
   function renderFooterMetrics() {
     const m = DATA.metrics;
@@ -771,12 +927,15 @@
 
     renderModeBanner(yearData);
     renderBanner(yearData);
+    renderMvp(yearData);
     renderStandings(yearData);
     renderBracket(yearData);
     renderAccuracy(yearData);
+    initScrollReveal();
   }
 
   renderFooterMetrics();
+  renderMethodologyGrids();
   renderYear(DATA.present_year);
 })();
 </script>

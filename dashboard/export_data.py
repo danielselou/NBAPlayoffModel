@@ -35,9 +35,11 @@ import pandas as pd
 from config import (
     MAX_MODELED_YEAR, MIN_TRAIN_SEASONS, PRESENT_YEAR, RANDOM_SEED, START_SEASON_YEAR,
 )
+from dashboard.player_names import jersey_number, player_name
+from dashboard.portrait import generate_portrait_data_uri
 from dashboard.team_meta import TEAM_META
 from src.data_collection import generate_synthetic_league, season_label
-from src.features import add_advanced_team_columns
+from src.features import add_advanced_team_columns, era_adjusted_zscore
 from src.injury import player_injury_proneness, team_injury_risk
 from src.model import (
     build_ml_dataset, future_confidence, train_and_evaluate, walk_forward_predictions,
@@ -50,6 +52,9 @@ from src.team_strength import add_offcourt_factors, build_composite_ratings
 ROUND1_PAIRS = [(1, 8), (4, 5), (3, 6), (2, 7)]
 WALK_FORWARD_N_ESTIMATORS = 120
 SERIES_SIM_N = 6000
+MVP_MIN_MINUTES = 28.0
+MVP_WEIGHTS = {"pts_per36_z": 0.30, "ast_per36_z": 0.15, "reb_per36_z": 0.15,
+               "stocks_per36_z": 0.10, "ts_pct_z": 0.15, "team_win_pct": 0.15}
 
 
 def _series_win_prob(rating_winner: float, rating_loser: float, winner_is_higher_seed: bool,
@@ -181,6 +186,48 @@ def _comparison_rows(standings: dict, wf_year_df: pd.DataFrame, playoff_results_
     return rows
 
 
+def _build_mvp_pool(player_seasons: pd.DataFrame, composite: pd.DataFrame) -> pd.DataFrame:
+    """Score every rotation-caliber player-season on a simple, transparent
+    MVP formula -- era-adjusted z-scores (the same `era_adjusted_zscore`
+    used throughout the pipeline) on the box-score categories real MVP
+    voting weighs, plus team win% as a nod to "your team has to win."
+    Purely descriptive (uses that season's own stats, same as real MVP
+    voting), so there's no look-ahead concern the way there is for the
+    predictive features elsewhere in this project.
+    """
+    pool = player_seasons[player_seasons.minutes_per_game >= MVP_MIN_MINUTES].copy()
+    pool["stocks_per36"] = pool.stl_per36 + pool.blk_per36
+    for raw_col in ("pts_per36", "ast_per36", "reb_per36", "stocks_per36", "ts_pct"):
+        pool[f"{raw_col}_z"] = era_adjusted_zscore(pool, raw_col, season_col="season").fillna(0.0)
+
+    win_pct_by_team_year = composite.set_index(["year", "team"])["win_pct"]
+    pool["team_win_pct"] = pool.set_index(["year", "team"]).index.map(win_pct_by_team_year).fillna(0.5)
+
+    pool["mvp_score"] = sum(pool[col] * w for col, w in MVP_WEIGHTS.items())
+    return pool
+
+
+def _select_mvp(mvp_pool: pd.DataFrame, year: int) -> dict | None:
+    year_pool = mvp_pool[mvp_pool.year == year]
+    if year_pool.empty:
+        return None
+    row = year_pool.loc[year_pool.mvp_score.idxmax()]
+    pid = int(row.player_id)
+    team_color = TEAM_META.get(row.team, {}).get("color", "#999999")
+    num = jersey_number(pid)
+    return {
+        "player_id": pid, "name": player_name(pid), "team": row.team, "position": row.position,
+        "jersey_number": num, "age": int(row.age),
+        "stats": {
+            "pts_per36": round(float(row.pts_per36), 1), "ast_per36": round(float(row.ast_per36), 1),
+            "reb_per36": round(float(row.reb_per36), 1), "stl_per36": round(float(row.stl_per36), 1),
+            "blk_per36": round(float(row.blk_per36), 1), "ts_pct": round(float(row.ts_pct), 3),
+        },
+        "team_win_pct": round(float(row.team_win_pct), 3),
+        "portrait": generate_portrait_data_uri(pid, team_color, row.position, num),
+    }
+
+
 def export(output_path: Path = Path(__file__).parent / "data.json") -> dict:
     t0 = time.time()
     print(f"Generating league {START_SEASON_YEAR}-{MAX_MODELED_YEAR} (history through {PRESENT_YEAR}, "
@@ -194,6 +241,9 @@ def export(output_path: Path = Path(__file__).parent / "data.json") -> dict:
     player_seasons, team_drop = build_playoff_dropoff_features(player_seasons)
     composite = build_composite_ratings(team_seasons, team_inj, team_drop)
     ml_df = build_ml_dataset(composite, league["playoff_results"])
+
+    print("Selecting season MVPs and generating portrait cards...")
+    mvp_pool = _build_mvp_pool(player_seasons, composite)
 
     print("Training headline model (fixed held-out test years, for footer metrics)...")
     historical_ml_df = ml_df[ml_df.year <= PRESENT_YEAR]
@@ -258,6 +308,10 @@ def export(output_path: Path = Path(__file__).parent / "data.json") -> dict:
         if historical:
             pr_year = playoff_results[playoff_results.year == year]
             payload["comparison"] = _comparison_rows(standings, wf_year_df, pr_year)
+
+        mvp = _select_mvp(mvp_pool, year)
+        if mvp:
+            payload["mvp"] = mvp
 
         years_payload[str(int(year))] = payload
 
