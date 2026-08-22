@@ -21,7 +21,13 @@ typically use:
 | Playoff "riser/faller" tendency | Career playoff-vs-regular-season per-36 scoring delta (causal: only uses *prior* postseasons, never leaks the season being predicted) | `src/playoff_dropoff.py` |
 | Off-court context | Roster continuity, coaching stability, altitude home-court edge, market size | `src/team_strength.py` |
 | Playoff simulation | Monte Carlo full-bracket simulation using log5/Elo-style win probabilities with home-court advantage | `src/simulate.py` |
+| Era regimes ("how the game changed") | Pace, 3PA rate, and big-man-vs-guard value all shift by era (Big Man Era &rarr; Hand-Check &rarr; Perimeter Freedom &rarr; 3PT Revolution &rarr; Modern) instead of one fixed rate for 55 seasons | `src/era.py` |
 | Prediction | LogisticRegression + RandomForest + XGBoost ensemble | `src/model.py` |
+
+Modeled seasons run **1979-80 through 10 years past the last historical
+season** -- 1980 was chosen deliberately: it's the year the NBA introduced
+the 3-point line, giving the era system (below) real historical texture to
+work with instead of one flat window.
 
 ## Data source
 
@@ -70,7 +76,9 @@ python -m dashboard.build   # runs the pipeline, writes dashboard/index.html
 ```
 
 Produces a self-contained HTML page with a season picker covering every
-modeled year, 2002-03 through 10 seasons past the last historical season:
+modeled year, 1982-83 through 10 seasons past the last historical season
+(the walk-forward model needs a few seasons of history before its first
+genuine out-of-sample prediction):
 
 - **Historical seasons** show the generator's actual outcome (standings,
   bracket, champion) *and* a genuinely out-of-sample **walk-forward**
@@ -91,24 +99,42 @@ reconstructed from seeds + `rounds_won` for history (NBA brackets never
 re-seed, so the winner at each node is fully determined) or from
 re-simulated matchups for projections. `dashboard/team_meta.py` holds team
 display names/colors; `dashboard/template.html` is the page itself. Full
-export (35 seasons, walk-forward retraining included) takes 1-2 minutes.
+export (55 seasons, walk-forward retraining included) takes 3-4 minutes.
+A **per-era accuracy breakdown** (average walk-forward accuracy for each of
+the four historical eras) sits in the Model Accuracy section, so you can
+see where the fit holds up and where it doesn't, rather than one aggregate
+number hiding era-to-era variation.
 
-Each season also gets a **Season MVP** card: `dashboard/export_data.py`
-scores every rotation player (≥28 min/game) with the same
-`era_adjusted_zscore` used throughout the pipeline, blending scoring,
-playmaking, rebounding, stocks, and shooting efficiency with team win% —
-descriptive, not predictive, so there's no look-ahead concern the way
-there is for the model's features. `dashboard/player_names.py` gives each
-synthetic player ID a stable fictional name; `dashboard/portrait.py` draws
-a small illustrated card (team-color gradient, silhouette, jersey number)
-with Pillow and embeds it as a PNG data URI — there's no real photo behind
-these players, so the card is deliberately abstract rather than
-attempting a likeness. The page also has scroll-triggered reveal
-animations on secondary text (respecting `prefers-reduced-motion`) and an
-in-page **"How This Works"** section mapping every library and stat/formula
-on the page to where it's actually used — the same mapping as the table
-above, surfaced for anyone looking at the dashboard itself rather than
-this file.
+Each season also gets a **Season MVP** card, scored 85% stats / 15%
+"outside the box score": the stats side reuses `era_adjusted_zscore` (the
+same function used throughout the pipeline) on scoring, playmaking,
+rebounding, stocks, and shooting efficiency, with the sub-weights
+themselves shifting by era (rebounding/rim-protection matter more in the
+Big Man Era, efficiency more in the 3PT Revolution — see `src/era.py`); the
+media/market side blends team win% (the "your team has to win" voter
+narrative), market size, and a modeled narrative-buzz term, deliberately
+kept a minority weight. The card shows the *actual* stats-vs-media split
+for that pick, not just the fixed formula weight. `dashboard/player_names.py`
+gives each synthetic player ID a stable fictional name; `dashboard/portrait.py`
+draws a small illustrated card (team-color gradient, silhouette, jersey
+number) with Pillow and embeds it as a PNG data URI — there's no real photo
+behind these players, so the card is deliberately abstract rather than
+attempting a likeness.
+
+A separate **"Real NBA History"** panel (`dashboard/real_history.py`) shows
+the *actual* MVP and champion for each real season, 1982-83 through
+2023-24 — compiled from well-established public record, kept visually and
+structurally distinct from the model's own (entirely fictional) simulated
+season so the two are never confused. It ships with no real player photos
+(licensing them requires rights this project doesn't have); drop a
+licensed image at `dashboard/assets/real_mvps/<year>.jpg` and it's picked
+up automatically — see the README in that folder.
+
+The page also has scroll-triggered reveal animations on secondary text
+(respecting `prefers-reduced-motion`) and an in-page **"How This Works"**
+section mapping every library and stat/formula on the page to where it's
+actually used — the same mapping as the table above, surfaced for anyone
+looking at the dashboard itself rather than this file.
 
 ## Tests
 
@@ -126,15 +152,17 @@ in the bracket simulator, and this test catches that class of bug).
 ## Project layout
 
 ```
-config.py                 seasons, teams, RNG seed, simulation constants
+config.py                 seasons, teams, RNG seed, era anchors, simulation constants
+src/era.py                era interpolation (pace, 3PA rate, big-man/guard value by year)
 src/data_collection.py    nba_api fetch (best-effort) + synthetic league generator
 src/features.py           TS%/eFG%/Four Factors, SRS, Pythagorean, era z-scores
 src/injury.py             player + team injury-proneness scoring
 src/playoff_dropoff.py    playoff riser/faller scoring (causal/trailing)
 src/team_strength.py      composite rating: on-court + off-court factors
-src/model.py              ensemble ML training/evaluation
+src/model.py              ensemble ML training/evaluation, walk-forward, era accuracy
 src/simulate.py           log5/Elo win probability + Monte Carlo bracket sim
 main.py                   orchestrates the full pipeline
+dashboard/                visual dashboard: export, MVP/portrait, real-history reference
 tests/test_pipeline.py    pytest sanity + calibration tests
 ```
 
@@ -145,5 +173,19 @@ consistent (skill -> rating -> wins -> seeding -> playoff results all
 derive from the same underlying numbers, and several tests confirm the
 correlations hold), but it is **not real NBA history** — treat reported
 accuracy numbers as validation that the pipeline works end-to-end, not as
-real-world predictive accuracy. For real predictions, feed it actual
-`nba_api`/Basketball-Reference data in the same schema.
+real-world predictive accuracy.
+
+**Why not just train on real historical data?** `nba_api`/stats.nba.com is
+network-blocked from the environment this was built in (confirmed directly
+— see `fetch_real_season`'s docstring), and scraping Basketball-Reference
+would violate its terms of service, so bulk real box scores genuinely
+weren't reachable. The era system (`src/era.py`) is the honest middle
+ground: real, well-documented trends (the pace trough of the 90s, the 3PT
+rate's rise, big men's declining-then-partly-recovering value) shape the
+*synthetic* generator's anchor points, without claiming those anchors are
+verified historical statistics. The one place real facts do appear is the
+dashboard's "Real NBA History" panel (actual MVPs/champions, 1982-83
+onward) — kept strictly separate from, and never blended into, the
+model's own simulated season. Point `src/data_collection.py` at real box
+scores (same schema) from an environment with access, and everything
+downstream — features, model, dashboard — works unchanged.

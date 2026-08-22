@@ -359,6 +359,50 @@
   .mvp-stat-label { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
   .mvp-blurb { font-size: 12px; color: var(--ink-3); max-width: 62ch; margin: 14px 0 0; }
 
+  .mvp-breakdown { margin-top: 14px; max-width: 320px; }
+  .mvp-breakdown-label { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; display: flex; justify-content: space-between; }
+  .mvp-breakdown-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--surface-3); }
+  .mvp-breakdown-bar .seg-stats { background: var(--prob); }
+  .mvp-breakdown-bar .seg-media { background: var(--accent-west); }
+
+  /* ---------- era badge ---------- */
+  .era-tag {
+    display: inline-block; margin-top: 4px; font-family: "IBM Plex Sans", sans-serif;
+    font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px;
+    color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--border);
+  }
+
+  /* ---------- real history panel ---------- */
+  .real-history-card {
+    display: flex; gap: 20px; flex-wrap: wrap;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px 24px; box-shadow: var(--shadow); margin-bottom: 28px;
+  }
+  .real-history-head { display: flex; align-items: center; gap: 8px; flex: 1 1 100%; margin-bottom: 4px; }
+  .real-history-head .seal { width: 16px; height: 16px; color: var(--ink-3); flex: none; }
+  .real-history-head .eyebrow { color: var(--ink-3); }
+  .real-history-row { display: flex; align-items: center; gap: 12px; flex: 1 1 260px; }
+  .real-history-photo {
+    width: 52px; height: 52px; border-radius: 8px; object-fit: cover; flex: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .real-history-photo-placeholder {
+    width: 52px; height: 52px; border-radius: 8px; flex: none; background: var(--surface-2);
+    border: 1px dashed var(--border);
+  }
+  .real-history-row .rh-label { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; display: block; }
+  .real-history-row .rh-name { font-family: "Oswald", sans-serif; font-size: 16px; font-weight: 600; }
+  .real-history-row .rh-team { font-size: 12px; color: var(--ink-2); }
+  .real-history-caption { flex: 1 1 100%; font-size: 11px; color: var(--ink-3); margin-top: 8px; }
+
+  /* ---------- era accuracy ---------- */
+  .era-acc-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+  .era-acc-row { display: grid; grid-template-columns: 170px 1fr 50px 70px; align-items: center; gap: 10px; font-size: 12.5px; }
+  .era-acc-row .era-acc-name { color: var(--ink-2); }
+  .era-acc-row .meter { width: 100%; height: 6px; }
+  .era-acc-row .era-acc-val { text-align: right; font-weight: 600; }
+  .era-acc-row .era-acc-count { color: var(--ink-3); font-size: 11px; }
+
   /* ---------- methodology / library grid ---------- */
   .lib-grid, .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
   .stat-grid { margin-top: 14px; }
@@ -395,6 +439,7 @@
     <div class="head-meta">
       <span class="eyebrow">Viewing</span>
       <div class="season" id="season-label">—</div>
+      <span class="era-tag" id="era-tag"></span>
     </div>
   </header>
 
@@ -423,6 +468,8 @@
   </div>
 
   <div class="champion-banner" id="champion-banner"></div>
+
+  <div class="real-history-card" id="real-history-card" style="display:none"></div>
 
   <section id="mvp-section">
     <div class="section-head">
@@ -457,6 +504,9 @@
     </div>
     <div class="accuracy-panel" id="accuracy-panel"></div>
     <div class="comparison-wrap" id="comparison-wrap"></div>
+    <div class="subsection-label reveal">Accuracy By Era</div>
+    <p class="section-note reveal" style="margin-bottom: 10px;">How well the walk-forward model (retrained on only strictly-earlier seasons) tracks each era, on average</p>
+    <div class="era-acc-grid" id="era-acc-grid"></div>
   </section>
 
   <section id="methodology-section">
@@ -843,7 +893,15 @@
           <div class="mvp-stat"><span class="mvp-stat-value">${(mvp.stats.stl_per36 + mvp.stats.blk_per36).toFixed(1)}</span><span class="mvp-stat-label">Stocks/36</span></div>
           <div class="mvp-stat"><span class="mvp-stat-value">${(mvp.stats.ts_pct * 100).toFixed(1)}%</span><span class="mvp-stat-label">TS%</span></div>
         </div>
-        <p class="mvp-blurb reveal">Selected with the same era-adjusted z-score methodology (<code>src/features.era_adjusted_zscore</code>) used for every rating on this page: scoring, playmaking, rebounding, and stocks (steals+blocks) z-scored against that season's league, blended with shooting efficiency and team win% &mdash; not the model's hidden skill rating, just box-score stats a voter could see.</p>
+        <div class="mvp-breakdown reveal">
+          <div class="mvp-breakdown-label"><span>Stats</span><span>Media &amp; Market</span></div>
+          <div class="mvp-breakdown-bar">
+            <span class="seg-stats" style="width:${mvp.score_breakdown.stats_pct}%"></span>
+            <span class="seg-media" style="width:${mvp.score_breakdown.media_pct}%"></span>
+          </div>
+          <div class="mvp-breakdown-label"><span>${mvp.score_breakdown.stats_pct}%</span><span>${mvp.score_breakdown.media_pct}%</span></div>
+        </div>
+        <p class="mvp-blurb reveal">85% era-adjusted box-score z-scores (<code>src/features.era_adjusted_zscore</code>: scoring, playmaking, rebounding, stocks, efficiency &mdash; weighted for ${yearData.era}'s style of play) + 15% "outside the box score" factors real MVP voting weighs (team success, market size, a modeled narrative-buzz term) &mdash; the bar above shows the actual split for this pick, not just the fixed formula weight.</p>
       </div>`;
   }
 
@@ -873,6 +931,8 @@
       { name: "Era-Adjusted Z-Score", formula: "(x &minus; season mean) / season std", body: "The \"Era Ball\" adjustment: judges a stat against its own season, not face value across decades." },
       { name: "log5 Win Probability", formula: "1 / (1 + 10^(&minus;&Delta;Rating / 19))", body: "Single-game win probability from a net-rating gap, &plusmn;3 pts home court." },
       { name: "Net Rating", formula: "Off. Rating &minus; Def. Rating", body: "Points scored minus allowed per 100 possessions -- the backbone team-strength number." },
+      { name: "MVP Formula", formula: "0.85&middot;Stats + 0.15&middot;Media/Market", body: "Box-score z-scores dominate; team success, market size, and a modeled narrative-buzz term matter, but never the deciding factor." },
+      { name: "Era Weighting", formula: "reb/blk &times; big_wt, TS% &times; guard_wt", body: "Rebounding/rim-protection value and shooting-efficiency value swing with era (big_wt: 1.40 in 1980 &rarr; 0.82 by 2034) instead of one fixed weight for 55 seasons." },
     ];
     document.getElementById("stat-grid").innerHTML = stats.map(s => `
       <div class="stat-card reveal">
@@ -914,6 +974,52 @@
     ).join("");
   }
 
+  // ================= real NBA history reference panel =================
+  function renderRealHistory(yearData) {
+    const card = document.getElementById("real-history-card");
+    const rh = yearData.real_history;
+    if (!rh) { card.style.display = "none"; return; }
+    card.style.display = "";
+    const photo = rh.mvp_image
+      ? `<img class="real-history-photo" src="${rh.mvp_image}" alt="${rh.mvp.name}">`
+      : `<div class="real-history-photo-placeholder" aria-hidden="true"></div>`;
+    card.innerHTML = `
+      <div class="real-history-head">
+        <svg class="seal" viewBox="0 0 20 20" aria-hidden="true">
+          <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M6.5 10.2 L9 12.7 L13.5 7.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="eyebrow">Real NBA History &mdash; for comparison, not model output</span>
+      </div>
+      <div class="real-history-row">
+        ${photo}
+        <div>
+          <span class="rh-label">Actual ${yearData.season} MVP</span>
+          <div class="rh-name">${rh.mvp.name}${rh.mvp.note ? " <span style='font-weight:400;font-size:11px;color:var(--ink-3)'>(" + rh.mvp.note + ")</span>" : ""}</div>
+          <div class="rh-team">${rh.mvp.team}</div>
+        </div>
+      </div>
+      <div class="real-history-row">
+        <div class="real-history-photo-placeholder" aria-hidden="true"></div>
+        <div>
+          <span class="rh-label">Actual ${yearData.season} Champion</span>
+          <div class="rh-name">${rh.champion}</div>
+        </div>
+      </div>
+      <p class="real-history-caption reveal">Public record (award winners and Finals results), not project output. The model's own MVP and champion above/below are entirely fictional, simulated players and teams &mdash; the two are never the same thing.</p>`;
+  }
+
+  // ================= static era accuracy chart =================
+  function renderEraAccuracy() {
+    document.getElementById("era-acc-grid").innerHTML = DATA.era_accuracy.map(e => `
+      <div class="era-acc-row reveal">
+        <span class="era-acc-name">${e.era}</span>
+        <span class="meter"><span style="width:${Math.round(e.accuracy * 100)}%"></span></span>
+        <span class="era-acc-val">${pct(e.accuracy)}</span>
+        <span class="era-acc-count">${e.seasons} seasons</span>
+      </div>`).join("");
+  }
+
   // ================= master render =================
   function renderYear(year) {
     const yearData = DATA.years[year];
@@ -921,12 +1027,14 @@
 
     document.getElementById("season-eyebrow").textContent = yearData.season + " Season";
     document.getElementById("season-label").textContent = yearData.season + (yearData.historical ? "" : " (Projected)");
+    document.getElementById("era-tag").textContent = yearData.era;
 
     if (historicalYears.includes(year)) histSelect.value = year;
     else futureInput.value = year;
 
     renderModeBanner(yearData);
     renderBanner(yearData);
+    renderRealHistory(yearData);
     renderMvp(yearData);
     renderStandings(yearData);
     renderBracket(yearData);
@@ -936,6 +1044,7 @@
 
   renderFooterMetrics();
   renderMethodologyGrids();
+  renderEraAccuracy();
   renderYear(DATA.present_year);
 })();
 </script>

@@ -34,6 +34,7 @@ from config import (
     DATA_RAW_DIR, EASTERN_CONFERENCE, END_SEASON_YEAR, MAX_MODELED_YEAR, PLAYERS_PER_TEAM,
     RANDOM_SEED, ROTATION_SIZE, START_SEASON_YEAR, TEAMS, WESTERN_CONFERENCE,
 )
+from src.era import era_big_man_weight, era_guard_weight, era_pace, era_three_rate
 from src.simulate import simulate_series
 
 POSITIONS = ["PG", "SG", "SF", "PF", "C"]
@@ -173,20 +174,13 @@ def _assign_rosters(universe: pd.DataFrame, year: int, prior_rosters: dict[str, 
     return rosters, filler_df
 
 
-def _era_three_point_rate(year: int) -> float:
-    """League-average 3PA rate trend: the real "Era Ball" 3-point explosion."""
-    # Roughly tracks real NBA history: ~10% of FGA in 2000 -> ~40% by 2024.
-    progress = np.clip((year - 2000) / (2024 - 2000), 0, 1.3)
-    return 0.10 + 0.32 * progress
-
-
 def generate_synthetic_league(start_year: int = START_SEASON_YEAR, end_year: int = END_SEASON_YEAR,
                                seed: int = RANDOM_SEED) -> dict[str, pd.DataFrame]:
     """Generate a full synthetic league: player-seasons, team-seasons, and
     playoff results, for every season in [start_year, end_year] inclusive.
     """
     rng = np.random.default_rng(seed)
-    universe = _make_player_universe(n_players=int(PLAYERS_PER_TEAM * 30 * 9), seed=seed)
+    universe = _make_player_universe(n_players=int(PLAYERS_PER_TEAM * 30 * 13), seed=seed)
 
     player_season_rows = []
     team_season_rows = []
@@ -195,7 +189,8 @@ def generate_synthetic_league(start_year: int = START_SEASON_YEAR, end_year: int
 
     for year in sorted(range(start_year, end_year + 1)):
         season = season_label(year)
-        three_rate_league = _era_three_point_rate(year)
+        three_rate_league = era_three_rate(year)
+        big_wt, guard_wt = era_big_man_weight(year), era_guard_weight(year)
         rosters, filler_df = _assign_rosters(universe, year, prior_rosters, rng)
         prior_rosters = rosters
         season_pool = pd.concat([universe, filler_df], ignore_index=True) if len(filler_df) else universe
@@ -208,9 +203,13 @@ def generate_synthetic_league(start_year: int = START_SEASON_YEAR, end_year: int
             age = year - roster.entry_year + roster.entry_age
             roster = roster.assign(age=age)
 
-            # Minutes/role: rank by (skill, age-curve-adjusted) within team.
+            # Minutes/role: rank by (skill, age-curve-adjusted, era-position-value-
+            # adjusted) within team. Wings (SF) sit at the neutral midpoint between
+            # the big-man/guard eras; only true bigs and true guards swing with era.
             age_factor = 1 - 0.012 * (roster.age - roster.peak_age).abs()
-            effective_rating = roster.base_skill * age_factor.clip(lower=0.4)
+            position_mult = roster.position.map({"PG": guard_wt, "SG": guard_wt, "SF": 1.0,
+                                                   "PF": big_wt, "C": big_wt})
+            effective_rating = roster.base_skill * age_factor.clip(lower=0.4) * position_mult
             order = effective_rating.sort_values(ascending=False).index
             n = len(roster)
             minutes = np.interp(np.arange(n), [0, ROTATION_SIZE - 1, n - 1], [34, 18, 8])
@@ -224,22 +223,33 @@ def generate_synthetic_league(start_year: int = START_SEASON_YEAR, end_year: int
             roster["games_missed"] = games_missed
 
             # Shooting/production, correlated with skill & position & era 3PT trend.
+            # Bigs' reluctance to shoot 3s scales with how big-man-favorable the
+            # era is: 1980s post-up bigs almost never shot from deep; modern
+            # "stretch" bigs shoot far more like guards.
             is_big = roster.position.isin(["PF", "C"])
+            big_three_penalty = 0.14 * (big_wt - 0.5)
             three_att_rate = np.clip(
-                three_rate_league + 0.15 * roster.three_pt_ability / 2.2 - 0.10 * is_big, 0.02, 0.65
+                three_rate_league + 0.15 * roster.three_pt_ability / 2.2 - big_three_penalty * is_big,
+                0.01, 0.65,
             )
             fg_pct = np.clip(0.44 + 0.015 * roster.base_skill / 2.2 - 0.05 * three_att_rate, 0.36, 0.62)
             three_pct = np.clip(0.34 + 0.05 * roster.three_pt_ability, 0.20, 0.46)
             ft_pct = np.clip(0.75 + 0.03 * roster.base_skill / 2.2 + rng.normal(0, 0.05, n), 0.55, 0.93)
 
+            # Rebounding/rim-protection bonus for bigs, and the assist bonus for
+            # guards, both scale with how favorable the era is to that role: post
+            # touches and boxing out were bigger boards sources in the Big Man
+            # Era; ball movement through guards is more central in guard-favorable
+            # eras.
+            is_guard = roster.position.isin(["PG", "SG"])
             usage = np.clip(0.16 + 0.03 * roster.base_skill / 2.2 + rng.normal(0, 0.02, n), 0.10, 0.36)
             pts36 = np.clip(9 + 5.5 * roster.base_skill / 2.2 + rng.normal(0, 1.5, n), 3, 34)
-            reb36 = np.clip(4 + 5 * is_big.astype(float) +
+            reb36 = np.clip(4 + 5 * big_wt * is_big.astype(float) +
                              1.5 * roster.base_skill / 2.2 + rng.normal(0, 1.2, n), 1.5, 16)
-            ast36 = np.clip(2 + 4 * (roster.position.isin(["PG", "SG"])).astype(float) +
+            ast36 = np.clip(2 + 4 * guard_wt * is_guard.astype(float) +
                              1.2 * roster.base_skill / 2.2 + rng.normal(0, 1.0, n), 0.5, 11)
             stl36 = np.clip(0.6 + 0.35 * roster.base_skill / 2.2 + rng.normal(0, 0.3, n), 0.1, 2.6)
-            blk36 = np.clip(0.3 + 1.4 * is_big.astype(float) + 0.25 * roster.base_skill / 2.2 +
+            blk36 = np.clip(0.3 + 1.4 * big_wt * is_big.astype(float) + 0.25 * roster.base_skill / 2.2 +
                              rng.normal(0, 0.3, n), 0.0, 3.5)
             tov36 = np.clip(1.2 + 0.15 * usage * 10 + rng.normal(0, 0.4, n), 0.6, 4.5)
             # True Shooting %: blends 2pt/3pt/FT efficiency directly (not derived
@@ -275,7 +285,7 @@ def generate_synthetic_league(start_year: int = START_SEASON_YEAR, end_year: int
         for team in TEAMS:
             rel_skill = team_skill[team] - league_mean_skill
             net_rating = rel_skill * 4.0 + rng.normal(0, 1.5)  # ~ -12..+12 typical NBA range
-            pace = np.clip(96 + 6 * np.clip((year - 2000) / 24, 0, 1) + rng.normal(0, 2), 90, 106)
+            pace = np.clip(era_pace(year) + rng.normal(0, 2), 85, 108)
             off_rating = 113.0 + net_rating / 2 + rng.normal(0, 1.0)
             def_rating = off_rating - net_rating
             pts_for = off_rating / 100 * pace

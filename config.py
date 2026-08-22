@@ -11,8 +11,11 @@ for _d in (DATA_RAW_DIR, DATA_PROCESSED_DIR, OUTPUT_DIR):
 
 RANDOM_SEED = 42
 
-# Seasons to model, e.g. "1999-00" through "2023-24"
-START_SEASON_YEAR = 2000
+# Seasons to model. Starts at 1980 -- the season the 3-point line was
+# introduced ("1979-80") -- so the era system below has real historical
+# texture to work with (a pre-3pt Big Man Era through today's spacing game),
+# not just one 25-year window.
+START_SEASON_YEAR = 1980
 END_SEASON_YEAR = 2024
 CURRENT_SEASON_YEAR = END_SEASON_YEAR
 
@@ -25,6 +28,53 @@ CURRENT_SEASON_YEAR = END_SEASON_YEAR
 PRESENT_YEAR = END_SEASON_YEAR
 FUTURE_HORIZON_YEARS = 10
 MAX_MODELED_YEAR = END_SEASON_YEAR + FUTURE_HORIZON_YEARS
+
+# --------------------------------------------------------------------------
+# Era system: the synthetic league doesn't just ramp smoothly across 55
+# seasons -- real NBA history didn't either. These are stylized, order-of-
+# magnitude design choices (loosely tracking real, well-known trends: the
+# 3-point rate explosion, the pace trough of the physical/hand-check 90s,
+# the decline and partial recent revival of traditional big-man value) used
+# to shape the *synthetic* generator -- not a claim of precise historical
+# statistics. src/era.py interpolates between these anchor points.
+# --------------------------------------------------------------------------
+ERA_BANDS = [
+    (1980, 1994, "Big Man Era"),
+    (1995, 2004, "Hand-Check Era"),
+    (2005, 2014, "Perimeter Freedom Era"),
+    (2015, 2024, "Three-Point Revolution"),
+    (2025, MAX_MODELED_YEAR, "Modern Positionless Era"),
+]
+
+# League-average pace (possessions/48 min): high in the run-and-gun 80s,
+# a trough during the grinding, hand-check-legal 90s/early-2000s, rising
+# again as rules opened up the perimeter and small-ball took hold.
+PACE_ANCHORS = [
+    (1980, 105.0), (1985, 102.0), (1990, 99.5), (1995, 95.0), (1999, 90.5),
+    (2004, 90.5), (2008, 92.0), (2012, 94.0), (2016, 96.0), (2020, 100.0),
+    (2024, 99.0), (2029, 100.5), (MAX_MODELED_YEAR, 101.0),
+]
+
+# League-average 3PA rate (share of FGA): near-zero when the line was new,
+# a bump from the temporarily-shortened line (1994-97), reverting when the
+# line moved back, then the modern acceleration -- plateauing in the 2030s
+# in line with the real rate's recent deceleration.
+THREE_RATE_ANCHORS = [
+    (1980, 0.02), (1985, 0.04), (1990, 0.07), (1994, 0.11), (1997, 0.15),
+    (1998, 0.12), (2000, 0.11), (2004, 0.12), (2008, 0.15), (2012, 0.19),
+    (2015, 0.24), (2018, 0.32), (2020, 0.34), (2022, 0.37), (2024, 0.39),
+    (2028, 0.44), (MAX_MODELED_YEAR, 0.47),
+]
+
+# Relative value multiplier for traditional big men (PF/C) vs. guards/wings
+# in team strength and MVP scoring: dominant in the post-up 80s, declining
+# through the pace-and-space 2010s, with a modest recent uptick (modern
+# do-everything centers). Guard/wing value moves roughly inversely.
+BIG_MAN_WEIGHT_ANCHORS = [
+    (1980, 1.40), (1990, 1.35), (1995, 1.25), (2000, 1.15), (2004, 1.10),
+    (2008, 1.02), (2012, 0.95), (2015, 0.88), (2018, 0.82), (2020, 0.80),
+    (2022, 0.83), (2024, 0.85), (2028, 0.83), (MAX_MODELED_YEAR, 0.82),
+]
 
 # Walk-forward evaluation: a year needs at least this many strictly-earlier
 # seasons of training data before it gets a genuine out-of-sample prediction.
