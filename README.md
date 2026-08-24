@@ -55,6 +55,21 @@ are driven by the same signals the feature pipeline computes, not arbitrary
 noise. Point it at real box scores by populating `data/raw/` in the same
 schema and swapping the loader in `main.py`.
 
+Each season's free-agent fill-in drafts in a **reshuffled team order**
+(`_assign_rosters` in `src/data_collection.py`), not the fixed alphabetical
+`TEAMS` list -- looping teams in the same order every year let early-
+alphabet teams (Atlanta, Boston, Brooklyn, ...) claim the best available
+free agent first *every single season for the full 55-year range*, baking
+in a permanent skill hierarchy instead of realistic year-to-year
+competitive churn (caught from oddly extreme, static-looking standings:
+Atlanta and Brooklyn were structurally overrated in every season, several
+teams' playoff odds were pinned near 0%/100% regardless of actual season
+strength). Shuffling draft order per season dropped the 55-season win-pct
+spread across teams from 0.58 to roughly 0.12-0.17 -- real-league-scale
+parity -- and single-season records now land in a normal range (best/worst
+team varies year to year) instead of the same teams posting 70-plus-win or
+sub-20-win seasons on repeat.
+
 ## Setup
 
 ```bash
