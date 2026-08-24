@@ -42,8 +42,8 @@ ERA_BANDS = [
     (1980, 1994, "Big Man Era"),
     (1995, 2004, "Hand-Check Era"),
     (2005, 2014, "Perimeter Freedom Era"),
-    (2015, 2024, "Three-Point Revolution"),
-    (2025, MAX_MODELED_YEAR, "Modern Positionless Era"),
+    (2015, 2025, "Three-Point Revolution"),
+    (2026, MAX_MODELED_YEAR, "Modern Positionless Era"),
 ]
 
 # League-average pace (possessions/48 min): high in the run-and-gun 80s,

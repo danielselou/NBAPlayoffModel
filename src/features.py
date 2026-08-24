@@ -113,5 +113,5 @@ def add_advanced_team_columns(team_seasons: pd.DataFrame) -> pd.DataFrame:
     df["srs"] = simple_rating_system(df)
     for col in ("net_rating", "avg_three_att_rate", "avg_ts_pct", "pace"):
         if col in df.columns:
-            df[f"{col}_era_z"] = era_adjusted_zscore(df, col)
+            df[f"{col}_era_z"] = era_adjusted_zscore(df, col).fillna(0.0)
     return df

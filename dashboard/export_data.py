@@ -53,7 +53,7 @@ from src.simulate import simulate_series
 from src.team_strength import add_offcourt_factors, build_composite_ratings
 
 ROUND1_PAIRS = [(1, 8), (4, 5), (3, 6), (2, 7)]
-WALK_FORWARD_N_ESTIMATORS = 120
+WALK_FORWARD_N_ESTIMATORS = 180
 SERIES_SIM_N = 6000
 MVP_MIN_MINUTES = 28.0
 # MVP formula is 85% box-score stats, 15% "outside the box score" -- team

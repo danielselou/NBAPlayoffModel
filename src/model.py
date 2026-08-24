@@ -35,8 +35,17 @@ from config import (
 )
 
 FEATURE_COLS = [
-    "composite_team_rating", "srs", "net_rating", "pyth_win_pct", "win_pct",
-    "avg_three_att_rate", "avg_ts_pct", "avg_tov_per36", "pace",
+    # net_rating/avg_three_att_rate/avg_ts_pct/pace use their era-adjusted
+    # z-score versions (from features.add_advanced_team_columns), not the
+    # raw values: those four have real, deliberate drift across the 55-
+    # season era-modeled range (pace ~105 in 1980 vs ~90 in 2000 vs ~100 in
+    # 2030, 3PA rate ~2% vs ~40%), so a raw value doesn't mean the same
+    # thing in different eras. Feeding the model the raw numbers measurably
+    # hurt accuracy once the range grew past one narrow window (validated:
+    # era-z features scored higher made-playoffs accuracy/AUC and notably
+    # better champion AUC/log-loss in a direct A/B on identical data).
+    "composite_team_rating", "srs", "net_rating_era_z", "pyth_win_pct", "win_pct",
+    "avg_three_att_rate_era_z", "avg_ts_pct_era_z", "avg_tov_per36", "pace_era_z",
     "team_injury_risk", "team_playoff_dropoff_score", "roster_continuity",
     "coach_stability_index", "home_court_index", "big_market_flag",
 ]
