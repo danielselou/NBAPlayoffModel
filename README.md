@@ -29,6 +29,16 @@ season** -- 1980 was chosen deliberately: it's the year the NBA introduced
 the 3-point line, giving the era system (below) real historical texture to
 work with instead of one flat window.
 
+`src/model.py`'s `FEATURE_COLS` feeds the classifiers the **era-adjusted
+z-scores** of net rating, 3PA rate, TS%, and pace (`*_era_z`), not their
+raw values: those four drift enormously across a 55-season range (league
+pace alone runs ~105 in 1980 down to ~90 around 2000 back up to ~100 by
+the 2020s), so a raw number doesn't mean the same thing in different eras.
+Feeding raw values measurably hurt accuracy once the modeled range grew
+past one narrow window; a controlled A/B on identical data showed the
+era-normalized features winning on every metric (made-playoffs accuracy,
+log-loss, and AUC for all three targets).
+
 ## Data source
 
 Real NBA stats can be pulled live via [`nba_api`](https://github.com/swar/nba_api)
