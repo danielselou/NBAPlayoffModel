@@ -150,16 +150,24 @@ def _assign_rosters(universe: pd.DataFrame, year: int, prior_rosters: dict[str, 
         rosters[team] = retained
         claimed.update(retained)
 
+    # Draft order for the free-agent fill-in below is reshuffled every season
+    # (not the fixed TEAMS list order) -- looping teams in the same order
+    # every year would let early-alphabet teams (ATL, BOS, BKN, ...) claim
+    # the best available free agent first *every single season for 55
+    # years straight*, baking in a permanent, alphabetical skill hierarchy
+    # instead of the real league's year-to-year competitive churn.
+    draft_order = list(rng.permutation(TEAMS))
+
     free_agents = sorted(active_ids - claimed, key=lambda pid: -skill.get(pid, -999))
     fa_idx = 0
-    for team in TEAMS:
+    for team in draft_order:
         while len(rosters[team]) < PLAYERS_PER_TEAM and fa_idx < len(free_agents):
             rosters[team].append(free_agents[fa_idx])
             fa_idx += 1
 
     filler_rows = []
     next_id = int(universe.player_id.max()) + 1
-    for team in TEAMS:
+    for team in draft_order:
         while len(rosters[team]) < PLAYERS_PER_TEAM:
             filler_rows.append({
                 "player_id": next_id, "position": rng.choice(POSITIONS),
