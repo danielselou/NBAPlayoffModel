@@ -36,7 +36,7 @@ from config import (
     ERA_BANDS, MAX_MODELED_YEAR, MIN_TRAIN_SEASONS, PRESENT_YEAR, RANDOM_SEED, START_SEASON_YEAR,
 )
 from dashboard.player_names import jersey_number, player_name
-from dashboard.portrait import generate_portrait_data_uri
+from dashboard.portrait import generate_portrait_data_uri, generate_real_player_card
 from dashboard.real_history import REAL_CHAMPION, REAL_MVP, real_mvp_image_data_uri
 from dashboard.real_mvp_prediction import build_prediction as build_real_mvp_prediction
 from dashboard.team_meta import TEAM_META
@@ -376,9 +376,15 @@ def export(output_path: Path = Path(__file__).parent / "data.json") -> dict:
             payload["mvp"] = mvp
 
         if year in REAL_MVP:
+            real_mvp_info = REAL_MVP[year]
+            mvp_image = real_mvp_image_data_uri(year)
             payload["real_history"] = {
-                "mvp": REAL_MVP[year], "champion": REAL_CHAMPION.get(year),
-                "mvp_image": real_mvp_image_data_uri(year),
+                "mvp": real_mvp_info, "champion": REAL_CHAMPION.get(year),
+                "mvp_image": mvp_image,
+                "mvp_card": None if mvp_image else generate_real_player_card(
+                    real_mvp_info["name"], real_mvp_info["team"],
+                    real_mvp_info["position"], real_mvp_info["number"],
+                ),
             }
 
         years_payload[str(int(year))] = payload
@@ -394,12 +400,18 @@ def export(output_path: Path = Path(__file__).parent / "data.json") -> dict:
         if (hist_acc.era == band_name).any()
     ]
 
+    real_mvp_prediction = build_real_mvp_prediction()
+    for candidate in real_mvp_prediction["candidates"]:
+        candidate["card"] = generate_real_player_card(
+            candidate["name"], candidate["team"], candidate["position"].split("/")[0], candidate["number"],
+        )
+
     result = {
         "present_year": PRESENT_YEAR, "min_year": min_year, "max_year": MAX_MODELED_YEAR,
         "baseline_accuracy": round(baseline_accuracy, 3),
         "metrics": headline.metrics,
         "era_accuracy": era_accuracy,
-        "real_mvp_prediction": build_real_mvp_prediction(),
+        "real_mvp_prediction": real_mvp_prediction,
         "teams": teams_meta,
         "years": years_payload,
     }

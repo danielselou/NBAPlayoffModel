@@ -95,3 +95,21 @@ def generate_portrait_data_uri(player_id: int, team_color: str, position: str, j
     buf = io.BytesIO()
     rounded.save(buf, format="PNG", optimize=True)
     return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+
+
+def generate_real_player_card(name: str, team_full_name: str, position: str, number: int) -> str:
+    """Same illustrated-card treatment, for a real player, when no real
+    photo file has been supplied (see dashboard/real_history.py and
+    dashboard/real_mvp_prediction.py). Still an abstract silhouette, not an
+    attempted likeness -- the jersey number/team color are the only real,
+    identifying details, same as an unofficial fan-made stat card.
+    """
+    from dashboard.team_meta import TEAM_META  # local import: avoids a module-load cycle
+
+    color = "#999999"
+    for meta in TEAM_META.values():
+        if meta["name"] == team_full_name:
+            color = meta["color"]
+            break
+    player_id = int.from_bytes(name.encode("utf-8"), "little", signed=False) % (2**31)
+    return generate_portrait_data_uri(player_id, color, position, number)
