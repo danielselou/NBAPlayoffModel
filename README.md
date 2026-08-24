@@ -173,19 +173,26 @@ looking at the dashboard itself rather than this file.
 
 A third, standalone section — **"Real-World MVP Prediction"**
 (`dashboard/real_mvp_prediction.py`) — is independent of the season picker
-entirely: a real, current NBA player, ranked by a transparent rubric (55%
-performance / 20% team success / 15% media press / 10% fan popularity),
-where every 0-10 score is Claude's own qualitative judgment from general
-basketball knowledge, not a database lookup or sourced statistic (there's
-no real per-player data anywhere in this project to compute one from — see
-Honest limitations). It's presented as a snapshot opinion with an explicit
-knowledge-cutoff date, not a live prediction, and it corrects a common
-misconception in-page: real MVP voting has no official fan-vote component
-(that's the All-Star Game); "fan popularity" here is an honest
-cultural-impact proxy, not a cited poll. Like the Real NBA History panel,
-each candidate gets the same illustrated-card fallback (no real photos
-are licensed for this project) using their real jersey number and team
-color, clearly captioned as an illustration rather than a photo.
+entirely: a real, current NBA player, predicted the same way the rest of
+this project predicts anything — real inputs, z-scored across the
+candidate pool, combined into a weighted composite (55% real per-game
+performance / 20% real team win% / 25% real recognition history, i.e.
+career MVP awards + All-Star selections) — rather than hand-typed 0-10
+judgment calls. The one thing this project genuinely can't do is fetch
+that real per-player data live (there's no real per-player data source
+reachable from this environment — see Honest limitations), so the numbers
+themselves are Claude's own recollection of each candidate's well-
+documented public stats from their most recently *completed* real season,
+not a live feed: approximate, not freshly sourced, and clearly labeled as
+such in the module and on the page — verify exact figures independently
+before citing formally. It's presented as a snapshot computed from
+old-but-real inputs with an explicit knowledge-cutoff date, not a live
+prediction, and it corrects a common misconception in-page: real MVP
+voting has no official fan-vote component (that's the All-Star Game).
+Like the Real NBA History panel, each candidate gets the same
+illustrated-card fallback (no real photos are licensed for this project)
+using their real jersey number and team color, clearly captioned as an
+illustration rather than a photo.
 
 ## Tests
 

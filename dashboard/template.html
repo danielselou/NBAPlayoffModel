@@ -1092,10 +1092,11 @@
         <div>
           <span class="rmp-row-name">${c.name} <span class="rmp-row-team">${c.team} &middot; ${c.position}</span></span>
           <div class="rmp-row-scores">
-            <span>Perf ${c.scores.performance}</span>
-            <span>Team ${c.scores.team_success}</span>
-            <span>Media ${c.scores.media_press}</span>
-            <span>Fan ${c.scores.fan_popularity}</span>
+            <span>${c.real_stats.pts} PPG</span>
+            <span>${c.real_stats.reb} RPG</span>
+            <span>${c.real_stats.ast} APG</span>
+            <span>${pct(c.team_win_pct)} team W%</span>
+            <span>${c.prior_mvp_awards} MVP${c.prior_mvp_awards === 1 ? "" : "s"}</span>
           </div>
         </div>
         <span class="rmp-row-total">${c.total_pct}%</span>
@@ -1115,11 +1116,16 @@
 
     const w = p.weights;
     document.getElementById("rmp-disclaimer").innerHTML =
-      `Formula: ${Math.round(w.performance * 100)}% performance + ${Math.round(w.team_success * 100)}% team success + ` +
-      `${Math.round(w.media_press * 100)}% media press + ${Math.round(w.fan_popularity * 100)}% fan popularity/cultural impact ` +
-      `(each candidate's 0-10 scores are Claude's own qualitative judgment, not sourced statistics or an official poll -- ` +
-      `there is no official MVP fan vote in real life; MVP is media-panel voted). Knowledge cutoff: ${p.knowledge_cutoff}, ` +
-      `while the ${p.predicting_season} season was still in progress. This is a snapshot opinion, not a live prediction -- ` +
+      `Formula: ${Math.round(w.performance * 100)}% real per-game performance (scoring/efficiency/playmaking/rebounding/` +
+      `stocks, z-scored across these 8 real candidates) + ${Math.round(w.team_success * 100)}% real team win% + ` +
+      `${Math.round(w.recognition * 100)}% real recognition history (career MVP awards + All-Star selections) -- the same ` +
+      `weighted-composite-of-real-numbers approach the model uses for team ratings and its own fictional Season MVP, just ` +
+      `run on each candidate's real, most recently completed season (${p.stats_season}) instead of a live feed (see the ` +
+      `module docstring in dashboard/real_mvp_prediction.py: no real per-player data source is reachable from this ` +
+      `environment, so these are Claude's own recollection of well-documented public stats -- approximate, not freshly ` +
+      `sourced; verify exact figures independently). Knowledge cutoff: ${p.knowledge_cutoff}, ` +
+      `while the ${p.predicting_season} season was still in progress. This is a snapshot computed from old-but-real ` +
+      `inputs, not a live prediction -- ` +
       `that real season may already be decided by the time you're reading this. Check an official source for the actual outcome. ` +
       `(2024-25 already has a real, confirmed MVP and champion -- see the Real NBA History panel for the season you're viewing below.) ` +
       `No licensed photos are available for these candidates, so each portrait above is an illustrated card (team color, real jersey number/position) -- not a photo.`;
