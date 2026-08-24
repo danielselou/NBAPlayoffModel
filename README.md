@@ -144,7 +144,11 @@ structurally distinct from the model's own (entirely fictional) simulated
 season so the two are never confused. It ships with no real player photos
 (licensing them requires rights this project doesn't have); drop a
 licensed image at `dashboard/assets/real_mvps/<year>.jpg` and it's picked
-up automatically — see the README in that folder.
+up automatically — see the README in that folder. Absent a real photo,
+`dashboard/export_data.py` falls back to `dashboard/portrait.py`'s
+illustrated-card generator (the same one used for the model's fictional
+MVPs), using each real player's actual jersey number/position/team color
+— still clearly a silhouette card, not a photo, and captioned as such.
 
 The page also has scroll-triggered reveal animations on secondary text
 (respecting `prefers-reduced-motion`) and an in-page **"How This Works"**
@@ -163,7 +167,10 @@ Honest limitations). It's presented as a snapshot opinion with an explicit
 knowledge-cutoff date, not a live prediction, and it corrects a common
 misconception in-page: real MVP voting has no official fan-vote component
 (that's the All-Star Game); "fan popularity" here is an honest
-cultural-impact proxy, not a cited poll.
+cultural-impact proxy, not a cited poll. Like the Real NBA History panel,
+each candidate gets the same illustrated-card fallback (no real photos
+are licensed for this project) using their real jersey number and team
+color, clearly captioned as an illustration rather than a photo.
 
 ## Tests
 
