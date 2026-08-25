@@ -950,6 +950,7 @@
       { badge: "scikit-learn", title: "One-third of the ensemble", body: "LogisticRegression + RandomForestClassifier + StandardScaler, soft-voted with XGBoost, for the made-playoffs call on every team you see in the standings." },
       { badge: "XGBoost", title: "Gradient-boosted trees", body: "Predicts made-playoffs, rounds-won (multiclass), and championship (rare-event, class-weighted) -- retrained from scratch for every single season shown here." },
       { badge: "Pillow", title: "The MVP portrait", body: "Draws the gradient, silhouette, and jersey number for the illustrated player card above, server-side, embedded as a plain PNG -- no external image host." },
+      { badge: "lifelines", title: "Injury-risk modeling", body: "Cox proportional-hazards regression (survival analysis) fit on age + usage rate vs. games-survived-before-injury -- the standard real sports-medicine technique for \"time until injury\" -- feeding <code>team_injury_risk</code> into the composite rating, the ML feature set, and the bracket simulator's win probabilities alike." },
       { badge: "nba_api", title: "Live data (optional)", body: "Can pull real box scores from stats.nba.com when reachable; this deployment runs on the synthetic league generator instead (see the README)." },
     ];
     document.getElementById("lib-grid").innerHTML = libs.map(l => `

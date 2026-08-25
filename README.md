@@ -17,7 +17,7 @@ typically use:
 | Advanced efficiency | True Shooting %, eFG%, Four Factors | `src/features.py` |
 | Team on-court strength | Net Rating, Simple Rating System (SRS), Pythagorean win expectation | `src/features.py` |
 | Era adjustment ("Era Ball") | Every rate stat z-scored against its **own season's** league context, so a 2003 3PA rate and a 2023 3PA rate are judged fairly instead of face-value | `src/features.py` |
-| Injury proneness | Trailing games-missed rate + age-based risk curve, weighted by each player's on-court impact | `src/injury.py` |
+| Injury proneness | Trailing games-missed rate + a `lifelines` Cox proportional-hazards fit (age + usage rate vs. games-survived-before-injury), weighted by each player's on-court impact | `src/injury.py` |
 | Playoff "riser/faller" tendency | Career playoff-vs-regular-season per-36 scoring delta (causal: only uses *prior* postseasons, never leaks the season being predicted) | `src/playoff_dropoff.py` |
 | Off-court context | Roster continuity, coaching stability, altitude home-court edge, market size | `src/team_strength.py` |
 | Playoff simulation | Monte Carlo full-bracket simulation using log5/Elo-style win probabilities with home-court advantage | `src/simulate.py` |
@@ -38,6 +38,31 @@ Feeding raw values measurably hurt accuracy once the modeled range grew
 past one narrow window; a controlled A/B on identical data showed the
 era-normalized features winning on every metric (made-playoffs accuracy,
 log-loss, and AUC for all three targets).
+
+**Injuries factor into every stage, not just one.** `src/injury.py` scores
+each player-season 0-1 by blending a trailing (prior-seasons-only, causal)
+games-missed rate with a [`lifelines`](https://lifelines.readthedocs.io/)
+Cox proportional-hazards fit -- the standard real sports-medicine survival-
+analysis technique for "games survived before a significant injury,"
+regressed on age and usage rate -- rather than a hand-picked age curve
+(the fitted model recovers the expected real relationship on its own:
+both age and usage rate come out as statistically significant, positive
+hazard predictors). That per-player score rolls up into `team_injury_risk`
+(minutes x usage weighted, so a starter's durability matters far more than
+a bench piece's), which then feeds three separate places: (1) it's a
+`FEATURE_COLS` input the made-playoffs/rounds-won/champion classifiers see
+directly, (2) it's one of `team_strength.py`'s composite-rating components
+(weighted -0.15, i.e. working against a team), and (3)
+`dashboard/export_data.py` subtracts it (scaled) from the rating fed into
+the actual bracket/series Monte Carlo simulation, so a banged-up team's
+game-by-game win probability is lower in the *simulated* playoffs too, not
+just in the standings. Separately, the synthetic generator's own game
+simulation already bakes in an age-injury effect when it decides how many
+games each player actually misses that season (`src/data_collection.py`) --
+`src/injury.py`'s job is to *re-estimate* that risk from observable stats
+alone (the same "figure it out from the data, don't just read the answer"
+principle the rest of the pipeline follows), not to read the generator's
+internal truth directly.
 
 ## Data source
 
