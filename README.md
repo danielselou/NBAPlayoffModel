@@ -155,21 +155,11 @@ the four historical eras) sits in the Model Accuracy section, so you can
 see where the fit holds up and where it doesn't, rather than one aggregate
 number hiding era-to-era variation.
 
-Each season also gets a **Season MVP** card, scored 85% stats / 15%
-"outside the box score": the stats side reuses `era_adjusted_zscore` (the
-same function used throughout the pipeline) on scoring, playmaking,
-rebounding, stocks, and shooting efficiency, with the sub-weights
-themselves shifting by era (rebounding/rim-protection matter more in the
-Big Man Era, efficiency more in the 3PT Revolution — see `src/era.py`); the
-media/market side blends team win% (the "your team has to win" voter
-narrative), market size, and a modeled narrative-buzz term, deliberately
-kept a minority weight. The card shows the *actual* stats-vs-media split
-for that pick, not just the fixed formula weight. `dashboard/player_names.py`
-gives each synthetic player ID a stable fictional name; `dashboard/portrait.py`
-draws a small illustrated card (team-color gradient, silhouette, jersey
-number) with Pillow and embeds it as a PNG data URI — there's no real photo
-behind these players, so the card is deliberately abstract rather than
-attempting a likeness.
+Earlier versions of this dashboard also crowned a fictional "Season MVP"
+for the synthetic league itself. It's been removed: once both the real
+MVP history panel and the real, data-driven MVP prediction (below)
+existed, a fictional stand-in MVP for a simulated season no longer earned
+its place and mostly caused confusion about which MVP was real.
 
 A separate **"Real NBA History"** panel (`dashboard/real_history.py`) shows
 the *actual* MVP and champion for each real season, 1982-83 through
@@ -186,9 +176,10 @@ season so the two are never confused. It ships with no real player photos
 licensed image at `dashboard/assets/real_mvps/<year>.jpg` and it's picked
 up automatically — see the README in that folder. Absent a real photo,
 `dashboard/export_data.py` falls back to `dashboard/portrait.py`'s
-illustrated-card generator (the same one used for the model's fictional
-MVPs), using each real player's actual jersey number/position/team color
-— still clearly a silhouette card, not a photo, and captioned as such.
+illustrated-card generator (the same one the Real-World MVP Prediction
+section below uses for its own candidates), using each real player's
+actual jersey number/position/team color — still clearly a silhouette
+card, not a photo, and captioned as such.
 
 The page also has scroll-triggered reveal animations on secondary text
 (respecting `prefers-reduced-motion`) and an in-page **"How This Works"**
@@ -218,6 +209,28 @@ Like the Real NBA History panel, each candidate gets the same
 illustrated-card fallback (no real photos are licensed for this project)
 using their real jersey number and team color, clearly captioned as an
 illustration rather than a photo.
+
+Right below it, an **"MVP Formula Backtest"** section runs that identical
+formula against 10 real, already-decided seasons (2010-11 through
+2024-25) instead of a still-open one: each season's actual top handful of
+MVP-caliber candidates, scored on their real final per-game stats and
+team record for that season, checked against who actually won (from
+`dashboard/real_history.py`'s `REAL_MVP`). This answers a different
+question than the live prediction does -- not "using last season's stats,
+who wins next" but "given this season's real numbers, does the formula's
+ranking rule land on the real result" -- the standard way to sanity-check
+a hand-built scoring rubric against history it was never fit to.
+Recognition inputs (career MVP awards/All-Star selections) only count
+what had happened *before* that season, so the formula never sees a
+season's own outcome while scoring it. Currently **4/10 (40%)**: it
+correctly picks LeBron 2013, Westbrook 2017, Harden 2018, and Jokic 2024,
+but misses on seasons where real voting rewarded team success or
+narrative over the rawest box-score line (2011: LeBron's numbers and
+recognition outscore Rose's, but Chicago's record and the "youngest MVP
+ever" story carried real voters; 2019: Harden's 36 PPG outscores Giannis
+on paper, but Giannis's two-way impact and Milwaukee's record won
+comfortably) -- an honest look at where a stats-heavy formula and real
+MVP voting actually diverge, not just where they agree.
 
 ## Public site
 

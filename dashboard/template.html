@@ -338,34 +338,6 @@
     .reveal { transition: none; }
   }
 
-  /* ---------- MVP card ---------- */
-  .mvp-card {
-    display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-    padding: 20px 24px; box-shadow: var(--shadow);
-  }
-  .mvp-portrait { flex: none; text-align: center; }
-  .mvp-info { flex: 1 1 240px; min-width: 0; }
-  .mvp-portrait img {
-    width: 128px; height: 160px; border-radius: 12px; display: block;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
-  }
-  .mvp-portrait-caption { font-size: 9.5px; color: var(--ink-3); max-width: 128px; margin-top: 6px; line-height: 1.3; }
-  .mvp-info h3 { font-size: 22px; display: flex; align-items: baseline; gap: 8px; }
-  .mvp-num { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-3); text-transform: none; letter-spacing: 0; }
-  .mvp-meta { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
-  .mvp-stat-row { display: flex; gap: 16px 22px; margin-top: 14px; flex-wrap: wrap; }
-  .mvp-stat { text-align: left; }
-  .mvp-stat-value { font-family: "Oswald", sans-serif; font-size: 20px; font-weight: 600; display: block; }
-  .mvp-stat-label { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
-  .mvp-blurb { font-size: 12px; color: var(--ink-3); max-width: 62ch; margin: 14px 0 0; }
-
-  .mvp-breakdown { margin-top: 14px; max-width: 320px; }
-  .mvp-breakdown-label { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; display: flex; justify-content: space-between; }
-  .mvp-breakdown-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--surface-3); }
-  .mvp-breakdown-bar .seg-stats { background: var(--prob); }
-  .mvp-breakdown-bar .seg-media { background: var(--accent-west); }
-
   /* ---------- era badge ---------- */
   .era-tag {
     display: inline-block; margin-top: 4px; font-family: "IBM Plex Sans", sans-serif;
@@ -424,6 +396,35 @@
     background: var(--surface-2); border-radius: 10px; padding: 10px 14px;
   }
 
+  /* ---------- MVP formula backtest ---------- */
+  .backtest-summary {
+    display: flex; align-items: baseline; gap: 14px; margin-bottom: 16px;
+  }
+  .backtest-score { font-family: "Oswald", sans-serif; font-size: 34px; font-weight: 600; }
+  .backtest-score-label { font-size: 11.5px; color: var(--ink-3); line-height: 1.4; }
+  .backtest-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .backtest-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; box-shadow: var(--shadow);
+  }
+  .backtest-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .backtest-season { font-family: "Oswald", sans-serif; font-size: 15px; font-weight: 600; }
+  .backtest-badge { font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .backtest-card.hit .backtest-badge { color: var(--status-good); background: var(--status-good-soft); }
+  .backtest-card.miss .backtest-badge { color: var(--status-bad); background: var(--status-bad-soft); }
+  .backtest-rows { display: flex; flex-direction: column; gap: 6px; }
+  .backtest-row { display: grid; grid-template-columns: 22px 1fr 40px; align-items: center; gap: 8px; font-size: 12px; }
+  .backtest-row-img { width: 22px; height: 27px; border-radius: 4px; object-fit: cover; }
+  .backtest-row-name { color: var(--ink-2); min-width: 0; }
+  .backtest-row.actual .backtest-row-name { color: var(--ink); font-weight: 600; }
+  .backtest-tag {
+    display: inline-block; font-size: 9px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.03em; padding: 1px 5px; border-radius: 4px; margin: 1px 0 0 4px;
+  }
+  .backtest-row.actual .backtest-tag { color: var(--status-good); background: var(--status-good-soft); }
+  .picked-tag { color: var(--prob); background: var(--surface-3); }
+  .backtest-row-pct { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-3); }
+
   /* ---------- era accuracy ---------- */
   .era-acc-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
   .era-acc-row { display: grid; grid-template-columns: 170px 1fr 50px 70px; align-items: center; gap: 10px; font-size: 12.5px; }
@@ -479,6 +480,16 @@
     </div>
     <div class="rmp-card" id="rmp-card"></div>
     <p class="rmp-disclaimer reveal" id="rmp-disclaimer"></p>
+  </section>
+
+  <section id="mvp-backtest-section">
+    <div class="section-head">
+      <h2>MVP Formula Backtest</h2>
+      <span class="section-note reveal">The exact same formula above, run on 10 real seasons that already happened &mdash; did it get the real MVP right?</span>
+    </div>
+    <div class="backtest-summary" id="backtest-summary"></div>
+    <div class="backtest-grid" id="backtest-grid"></div>
+    <p class="methodology-note reveal" id="backtest-disclaimer"></p>
   </section>
 
   <div class="season-picker">
@@ -550,14 +561,6 @@
 
     <div class="subsection-label reveal">Stats &amp; Formulas</div>
     <div class="stat-grid" id="stat-grid"></div>
-  </section>
-
-  <section id="mvp-section">
-    <div class="section-head">
-      <h2 id="mvp-title">Season MVP</h2>
-      <span class="section-note reveal">Era-adjusted z-scores on scoring, playmaking, rebounding &amp; efficiency, plus team win%</span>
-    </div>
-    <div class="mvp-card" id="mvp-card"></div>
   </section>
 
   <footer>
@@ -908,50 +911,14 @@
     }
   }
 
-  // ================= MVP highlight =================
-  function renderMvp(yearData) {
-    const section = document.getElementById("mvp-section");
-    const mvp = yearData.mvp;
-    document.getElementById("mvp-title").textContent = yearData.historical ? "Season MVP" : "Projected Season MVP";
-    if (!mvp) { section.style.display = "none"; return; }
-    section.style.display = "";
-    const meta = teamMeta(mvp.team);
-    document.getElementById("mvp-card").innerHTML = `
-      <div class="mvp-portrait">
-        <img src="${mvp.portrait}" width="128" height="160" alt="Illustrated player card for ${mvp.name}, #${mvp.jersey_number}">
-        <div class="mvp-portrait-caption reveal">Illustrated card &mdash; a fictional player, not a real photo</div>
-      </div>
-      <div class="mvp-info">
-        <span class="eyebrow">${yearData.season}${yearData.historical ? "" : " (Projected)"} MVP</span>
-        <h3>${mvp.name} <span class="mvp-num">#${mvp.jersey_number}</span></h3>
-        <div class="mvp-meta">${dot(mvp.team)}${meta.name} &middot; ${mvp.position} &middot; Age ${mvp.age}</div>
-        <div class="mvp-stat-row">
-          <div class="mvp-stat"><span class="mvp-stat-value">${mvp.stats.pts_per36}</span><span class="mvp-stat-label">Pts/36</span></div>
-          <div class="mvp-stat"><span class="mvp-stat-value">${mvp.stats.reb_per36}</span><span class="mvp-stat-label">Reb/36</span></div>
-          <div class="mvp-stat"><span class="mvp-stat-value">${mvp.stats.ast_per36}</span><span class="mvp-stat-label">Ast/36</span></div>
-          <div class="mvp-stat"><span class="mvp-stat-value">${(mvp.stats.stl_per36 + mvp.stats.blk_per36).toFixed(1)}</span><span class="mvp-stat-label">Stocks/36</span></div>
-          <div class="mvp-stat"><span class="mvp-stat-value">${(mvp.stats.ts_pct * 100).toFixed(1)}%</span><span class="mvp-stat-label">TS%</span></div>
-        </div>
-        <div class="mvp-breakdown reveal">
-          <div class="mvp-breakdown-label"><span>Stats</span><span>Media &amp; Market</span></div>
-          <div class="mvp-breakdown-bar">
-            <span class="seg-stats" style="width:${mvp.score_breakdown.stats_pct}%"></span>
-            <span class="seg-media" style="width:${mvp.score_breakdown.media_pct}%"></span>
-          </div>
-          <div class="mvp-breakdown-label"><span>${mvp.score_breakdown.stats_pct}%</span><span>${mvp.score_breakdown.media_pct}%</span></div>
-        </div>
-        <p class="mvp-blurb reveal">85% era-adjusted box-score z-scores (<code>src/features.era_adjusted_zscore</code>: scoring, playmaking, rebounding, stocks, efficiency &mdash; weighted for ${yearData.era}'s style of play) + 15% "outside the box score" factors real MVP voting weighs (team success, market size, a modeled narrative-buzz term) &mdash; the bar above shows the actual split for this pick, not just the fixed formula weight.</p>
-      </div>`;
-  }
-
   // ================= static library / stats glossary =================
   function renderMethodologyGrids() {
     const libs = [
-      { badge: "pandas", title: "Every table on this page", body: "Standings, the comparison table, the MVP pool -- all pandas DataFrames. <code class=\"formula\">groupby(\"season\")</code> computes the era-adjusted z-scores behind Net Rtg, MVP stats, and playoff-dropoff tendency." },
+      { badge: "pandas", title: "Every table on this page", body: "Standings and the comparison table are pandas DataFrames. <code class=\"formula\">groupby(\"season\")</code> computes the era-adjusted z-scores behind Net Rtg and playoff-dropoff tendency." },
       { badge: "NumPy", title: "The math underneath", body: "Vectorized arithmetic for the Pythagorean formula, the log5 win-probability logistic, and the random-number generator driving every walk-forward retrain and bracket simulation." },
       { badge: "scikit-learn", title: "One-third of the ensemble", body: "LogisticRegression + RandomForestClassifier + StandardScaler, soft-voted with XGBoost, for the made-playoffs call on every team you see in the standings." },
       { badge: "XGBoost", title: "Gradient-boosted trees", body: "Predicts made-playoffs, rounds-won (multiclass), and championship (rare-event, class-weighted) -- retrained from scratch for every single season shown here." },
-      { badge: "Pillow", title: "The MVP portrait", body: "Draws the gradient, silhouette, and jersey number for the illustrated player card above, server-side, embedded as a plain PNG -- no external image host." },
+      { badge: "Pillow", title: "Illustrated player cards", body: "Draws the gradient, silhouette, and jersey number for the Real NBA History and Real-World MVP Prediction cards when no licensed photo exists, server-side, embedded as a plain PNG -- no external image host." },
       { badge: "lifelines", title: "Injury-risk modeling", body: "Cox proportional-hazards regression (survival analysis) fit on age + usage rate vs. games-survived-before-injury -- the standard real sports-medicine technique for \"time until injury\" -- feeding <code>team_injury_risk</code> into the composite rating, the ML feature set, and the bracket simulator's win probabilities alike." },
       { badge: "nba_api", title: "Live data (optional)", body: "Can pull real box scores from stats.nba.com when reachable; this deployment runs on the synthetic league generator instead (see the README)." },
     ];
@@ -971,8 +938,7 @@
       { name: "Era-Adjusted Z-Score", formula: "(x &minus; season mean) / season std", body: "The \"Era Ball\" adjustment: judges a stat against its own season, not face value across decades." },
       { name: "log5 Win Probability", formula: "1 / (1 + 10^(&minus;&Delta;Rating / 19))", body: "Single-game win probability from a net-rating gap, &plusmn;3 pts home court." },
       { name: "Net Rating", formula: "Off. Rating &minus; Def. Rating", body: "Points scored minus allowed per 100 possessions -- the backbone team-strength number." },
-      { name: "MVP Formula", formula: "0.85&middot;Stats + 0.15&middot;Media/Market", body: "Box-score z-scores dominate; team success, market size, and a modeled narrative-buzz term matter, but never the deciding factor." },
-      { name: "Era Weighting", formula: "reb/blk &times; big_wt, TS% &times; guard_wt", body: "Rebounding/rim-protection value and shooting-efficiency value swing with era (big_wt: 1.40 in 1980 &rarr; 0.82 by 2034) instead of one fixed weight for 55 seasons." },
+      { name: "Era Weighting", formula: "reb/blk bonus &times; big_wt, ast bonus &times; guard_wt", body: "Rebounding/rim-protection production and playmaking production swing with era (big_wt: 1.40 in 1980 &rarr; 0.82 by 2034) instead of one fixed weight for 55 seasons of simulated players." },
     ];
     document.getElementById("stat-grid").innerHTML = stats.map(s => `
       <div class="stat-card reveal">
@@ -1047,7 +1013,7 @@
           <div class="rh-name">${rh.champion}</div>
         </div>
       </div>
-      <p class="real-history-caption reveal">Public record (award winners and Finals results), not project output.${rh.mvp_image ? "" : " No licensed photo is available for this MVP, so the portrait above is an illustrated card (team color, real jersey number/position) &mdash; not a photo."} The model's own MVP and champion above/below are entirely fictional, simulated players and teams &mdash; the two are never the same thing.</p>`;
+      <p class="real-history-caption reveal">Public record (award winners and Finals results), not project output.${rh.mvp_image ? "" : " No licensed photo is available for this MVP, so the portrait above is an illustrated card (team color, real jersey number/position) &mdash; not a photo."} The model's own champion below is an entirely fictional, simulated team &mdash; never the same thing as this real record.</p>`;
   }
 
   // ================= static era accuracy chart =================
@@ -1076,7 +1042,6 @@
     renderModeBanner(yearData);
     renderBanner(yearData);
     renderRealHistory(yearData);
-    renderMvp(yearData);
     renderStandings(yearData);
     renderBracket(yearData);
     renderAccuracy(yearData);
@@ -1122,7 +1087,7 @@
       `Formula: ${Math.round(w.performance * 100)}% real per-game performance (scoring/efficiency/playmaking/rebounding/` +
       `stocks, z-scored across these 8 real candidates) + ${Math.round(w.team_success * 100)}% real team win% + ` +
       `${Math.round(w.recognition * 100)}% real recognition history (career MVP awards + All-Star selections) -- the same ` +
-      `weighted-composite-of-real-numbers approach the model uses for team ratings and its own fictional Season MVP, just ` +
+      `weighted-composite-of-real-numbers approach the model uses for team ratings, just ` +
       `run on each candidate's real, most recently completed season (${p.stats_season}) instead of a live feed (see the ` +
       `module docstring in dashboard/real_mvp_prediction.py: no real per-player data source is reachable from this ` +
       `environment, so these are Claude's own recollection of well-documented public stats -- approximate, not freshly ` +
@@ -1134,10 +1099,46 @@
       `No licensed photos are available for these candidates, so each portrait above is an illustrated card (team color, real jersey number/position) -- not a photo.`;
   }
 
+  // ================= MVP formula backtest (static) =================
+  function renderMvpBacktest() {
+    const bt = DATA.real_mvp_backtest;
+    if (!bt) { document.getElementById("mvp-backtest-section").style.display = "none"; return; }
+
+    document.getElementById("backtest-summary").innerHTML = `
+      <span class="backtest-score">${bt.n_correct}/${bt.n_seasons}</span>
+      <span class="backtest-score-label">SEASONS THE FORMULA'S TOP PICK MATCHED<br>THE REAL MVP &mdash; ${pct(bt.accuracy)} accuracy</span>`;
+
+    document.getElementById("backtest-grid").innerHTML = bt.seasons.map(s => {
+      const rows = s.candidates.map((c, i) => `
+        <div class="backtest-row ${c.name === s.actual_mvp ? "actual" : ""}">
+          ${c.card ? `<img class="backtest-row-img" src="${c.card}" alt="" title="Illustrated card, not a real photo">` : "<span></span>"}
+          <span class="backtest-row-name">${c.name}${c.name === s.actual_mvp ? '<span class="backtest-tag">Real MVP</span>' : ""}${i === 0 ? '<span class="backtest-tag picked-tag">Formula&rsquo;s Pick</span>' : ""}</span>
+          <span class="backtest-row-pct">${c.total_pct}%</span>
+        </div>`).join("");
+      return `
+        <div class="backtest-card ${s.correct ? "hit" : "miss"} reveal">
+          <div class="backtest-card-head">
+            <span class="backtest-season">${s.season}</span>
+            <span class="backtest-badge">${s.correct ? "Correct" : "Missed"}</span>
+          </div>
+          <div class="backtest-rows">${rows}</div>
+        </div>`;
+    }).join("");
+
+    document.getElementById("backtest-disclaimer").innerHTML =
+      `Same formula and weights as the live prediction above, run on each real season's own real, final per-game stats/team ` +
+      `record for that season's actual top handful of MVP-caliber players (Claude's recollection, approximate -- see the ` +
+      `module docstring in dashboard/real_mvp_prediction.py) -- a check of whether the *formula itself* ranks a known real ` +
+      `outcome correctly, not a forecast. Career MVP awards/All-Star selections only count what had happened ` +
+      `<em>before</em> that season, so the formula never sees a season's own result while scoring it. The real winner is ` +
+      `always one of the 3 candidates shown per season, so this is an easier bar than picking from the full league.`;
+  }
+
   renderFooterMetrics();
   renderMethodologyGrids();
   renderEraAccuracy();
   renderRealMvpPrediction();
+  renderMvpBacktest();
   renderYear(DATA.present_year);
 })();
 </script>

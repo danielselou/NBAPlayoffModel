@@ -35,14 +35,14 @@ import pandas as pd
 from config import (
     ERA_BANDS, MAX_MODELED_YEAR, MIN_TRAIN_SEASONS, PRESENT_YEAR, RANDOM_SEED, START_SEASON_YEAR,
 )
-from dashboard.player_names import jersey_number, player_name
-from dashboard.portrait import generate_portrait_data_uri, generate_real_player_card
+from dashboard.portrait import generate_real_player_card
 from dashboard.real_history import REAL_CHAMPION, REAL_MVP, real_mvp_image_data_uri
+from dashboard.real_mvp_prediction import build_backtest as build_real_mvp_backtest
 from dashboard.real_mvp_prediction import build_prediction as build_real_mvp_prediction
 from dashboard.team_meta import TEAM_META
 from src.data_collection import generate_synthetic_league, season_label
-from src.era import era_big_man_weight, era_guard_weight, era_name
-from src.features import add_advanced_team_columns, era_adjusted_zscore
+from src.era import era_name
+from src.features import add_advanced_team_columns
 from src.injury import player_injury_proneness, team_injury_risk
 from src.model import (
     build_ml_dataset, future_confidence, train_and_evaluate, walk_forward_predictions,
@@ -55,27 +55,6 @@ from src.team_strength import add_offcourt_factors, build_composite_ratings
 ROUND1_PAIRS = [(1, 8), (4, 5), (3, 6), (2, 7)]
 WALK_FORWARD_N_ESTIMATORS = 180
 SERIES_SIM_N = 6000
-MVP_MIN_MINUTES = 28.0
-# MVP formula is 85% box-score stats, 15% "outside the box score" -- team
-# success (contender narrative), market size, and a modest narrative-buzz
-# term standing in for the real, well-documented (if unquantifiable) role
-# storylines play in actual MVP voting. Media/market is real MVP-voting
-# behavior, kept deliberately a minority weight, not the deciding factor.
-MVP_STATS_WEIGHT_TOTAL = 0.85
-MVP_MEDIA_WEIGHT_TOTAL = 0.15
-MVP_STATS_BASE_WEIGHTS = {  # pre-era-adjustment, pre-normalization
-    "pts_per36_z": 0.36, "ast_per36_z": 0.16, "reb_per36_z": 0.16,
-    "stocks_per36_z": 0.10, "ts_pct_z": 0.22,
-}
-MVP_MEDIA_WEIGHTS = {"team_win_pct": 0.08, "big_market_flag": 0.04, "buzz_z": 0.03}
-
-
-def _narrative_buzz(player_id: int, year: int) -> float:
-    """Deterministic stand-in for real, unquantifiable MVP-voter narrative
-    factors (trade rumors, contract-year performances, injury-comeback
-    storylines) -- a small, seeded pseudo-random value, not a real signal."""
-    seed = (int(player_id) * 1_000_003 + int(year)) % (2**31)
-    return float(np.random.default_rng(seed).normal())
 
 
 def _series_win_prob(rating_winner: float, rating_loser: float, winner_is_higher_seed: bool,
@@ -207,88 +186,6 @@ def _comparison_rows(standings: dict, wf_year_df: pd.DataFrame, playoff_results_
     return rows
 
 
-def _era_stats_weights(year: int) -> dict[str, float]:
-    """Era-adjusted, normalized-to-0.85 stats sub-weights: rebounding/stocks
-    matter relatively more in big-man-favorable eras, efficiency (heavily
-    3PT/spacing-driven) relatively more in guard/perimeter-favorable eras."""
-    big_wt, guard_wt = era_big_man_weight(year), era_guard_weight(year)
-    raw = dict(MVP_STATS_BASE_WEIGHTS)
-    raw["reb_per36_z"] *= big_wt
-    raw["stocks_per36_z"] *= big_wt
-    raw["ts_pct_z"] *= guard_wt
-    total = sum(raw.values())
-    return {k: (v / total) * MVP_STATS_WEIGHT_TOTAL for k, v in raw.items()}
-
-
-def _build_mvp_pool(player_seasons: pd.DataFrame, composite: pd.DataFrame) -> pd.DataFrame:
-    """Score every rotation-caliber player-season on an 85/15 stats-vs-media
-    MVP formula. The stats side reuses `era_adjusted_zscore` (the same
-    function used everywhere else in the pipeline) on the box-score
-    categories real MVP voting weighs, era-adjusted so a dominant rebounder
-    in 1985 and a dominant three-point shooter in 2024 are each judged by
-    their own era's standards. The media side is real MVP-voting behavior
-    (team success, market size, narrative) kept a deliberate minority
-    weight. Purely descriptive -- uses that season's own stats, same as
-    real MVP voting -- so there's no look-ahead concern the way there is
-    for the model's predictive features elsewhere in this project.
-    """
-    pool = player_seasons[player_seasons.minutes_per_game >= MVP_MIN_MINUTES].copy()
-    pool["stocks_per36"] = pool.stl_per36 + pool.blk_per36
-    for raw_col in ("pts_per36", "ast_per36", "reb_per36", "stocks_per36", "ts_pct"):
-        pool[f"{raw_col}_z"] = era_adjusted_zscore(pool, raw_col, season_col="season").fillna(0.0)
-
-    win_pct_by_team_year = composite.set_index(["year", "team"])["win_pct"]
-    market_by_team_year = composite.set_index(["year", "team"])["big_market_flag"]
-    idx = pool.set_index(["year", "team"]).index
-    pool["team_win_pct"] = idx.map(win_pct_by_team_year).fillna(0.5)
-    pool["big_market_flag"] = idx.map(market_by_team_year).fillna(0.0)
-    pool["buzz_z"] = [
-        _narrative_buzz(pid, yr) for pid, yr in zip(pool.player_id, pool.year)
-    ]
-
-    stats_score = pd.Series(0.0, index=pool.index)
-    media_score = pd.Series(0.0, index=pool.index)
-    for year, group_idx in pool.groupby("year").groups.items():
-        stats_w = _era_stats_weights(year)
-        for col, w in stats_w.items():
-            stats_score.loc[group_idx] += pool.loc[group_idx, col] * w
-        for col, w in MVP_MEDIA_WEIGHTS.items():
-            media_score.loc[group_idx] += pool.loc[group_idx, col] * w
-
-    pool["stats_score"] = stats_score
-    pool["media_score"] = media_score
-    pool["mvp_score"] = stats_score + media_score
-    return pool
-
-
-def _select_mvp(mvp_pool: pd.DataFrame, year: int) -> dict | None:
-    year_pool = mvp_pool[mvp_pool.year == year]
-    if year_pool.empty:
-        return None
-    row = year_pool.loc[year_pool.mvp_score.idxmax()]
-    pid = int(row.player_id)
-    team_color = TEAM_META.get(row.team, {}).get("color", "#999999")
-    num = jersey_number(pid)
-    total = row.stats_score + row.media_score
-    raw_share = float(row.stats_score / total) if total else MVP_STATS_WEIGHT_TOTAL
-    stats_share = min(max(raw_share, 0.0), 1.0)
-    return {
-        "player_id": pid, "name": player_name(pid), "team": row.team, "position": row.position,
-        "jersey_number": num, "age": int(row.age), "era": era_name(year),
-        "stats": {
-            "pts_per36": round(float(row.pts_per36), 1), "ast_per36": round(float(row.ast_per36), 1),
-            "reb_per36": round(float(row.reb_per36), 1), "stl_per36": round(float(row.stl_per36), 1),
-            "blk_per36": round(float(row.blk_per36), 1), "ts_pct": round(float(row.ts_pct), 3),
-        },
-        "team_win_pct": round(float(row.team_win_pct), 3),
-        "score_breakdown": {
-            "stats_pct": round(max(stats_share, 0.0) * 100, 1),
-            "media_pct": round(max(1 - stats_share, 0.0) * 100, 1),
-        },
-        "portrait": generate_portrait_data_uri(pid, team_color, row.position, num),
-    }
-
-
 def export(output_path: Path = Path(__file__).parent / "data.json") -> dict:
     t0 = time.time()
     print(f"Generating league {START_SEASON_YEAR}-{MAX_MODELED_YEAR} (history through {PRESENT_YEAR}, "
@@ -302,9 +199,6 @@ def export(output_path: Path = Path(__file__).parent / "data.json") -> dict:
     player_seasons, team_drop = build_playoff_dropoff_features(player_seasons)
     composite = build_composite_ratings(team_seasons, team_inj, team_drop)
     ml_df = build_ml_dataset(composite, league["playoff_results"])
-
-    print("Selecting season MVPs and generating portrait cards...")
-    mvp_pool = _build_mvp_pool(player_seasons, composite)
 
     print("Training headline model (fixed held-out test years, for footer metrics)...")
     historical_ml_df = ml_df[ml_df.year <= PRESENT_YEAR]
@@ -371,10 +265,6 @@ def export(output_path: Path = Path(__file__).parent / "data.json") -> dict:
             pr_year = playoff_results[playoff_results.year == year]
             payload["comparison"] = _comparison_rows(standings, wf_year_df, pr_year)
 
-        mvp = _select_mvp(mvp_pool, year)
-        if mvp:
-            payload["mvp"] = mvp
-
         if year in REAL_MVP:
             real_mvp_info = REAL_MVP[year]
             mvp_image = real_mvp_image_data_uri(year)
@@ -406,12 +296,20 @@ def export(output_path: Path = Path(__file__).parent / "data.json") -> dict:
             candidate["name"], candidate["team"], candidate["position"].split("/")[0], candidate["number"],
         )
 
+    real_mvp_backtest = build_real_mvp_backtest()
+    for season in real_mvp_backtest["seasons"]:
+        for candidate in season["candidates"]:
+            candidate["card"] = generate_real_player_card(
+                candidate["name"], candidate["team"], candidate["position"].split("/")[0], candidate["number"],
+            )
+
     result = {
         "present_year": PRESENT_YEAR, "min_year": min_year, "max_year": MAX_MODELED_YEAR,
         "baseline_accuracy": round(baseline_accuracy, 3),
         "metrics": headline.metrics,
         "era_accuracy": era_accuracy,
         "real_mvp_prediction": real_mvp_prediction,
+        "real_mvp_backtest": real_mvp_backtest,
         "teams": teams_meta,
         "years": years_payload,
     }
