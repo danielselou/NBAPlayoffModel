@@ -219,6 +219,32 @@ illustrated-card fallback (no real photos are licensed for this project)
 using their real jersey number and team color, clearly captioned as an
 illustration rather than a photo.
 
+## Public site
+
+`docs/index.html` is a committed mirror of the same self-contained
+dashboard (`dashboard/build.py` writes both paths from one build) --
+unlike `dashboard/index.html`, which is gitignored as a build artifact,
+`docs/` is meant to be served directly by
+[GitHub Pages](https://docs.github.com/pages), free, with no server of
+its own (it's one static HTML file with the data inlined).
+
+**One-time setup** (repo admin, via github.com -- not automatable from
+here): if the repo is private, make it public first (Pages needs a public
+repo on the free tier: Settings -> General -> Danger Zone -> Change
+visibility), then Settings -> Pages -> Source: "Deploy from a branch" ->
+branch: this branch -> folder: `/docs` -> Save. The site goes live at
+`https://<owner>.github.io/<repo>/` a minute or two later.
+
+**Publishing an update** after that is just: make the change, `python -m
+dashboard.build` (regenerates both `dashboard/index.html` and
+`docs/index.html`), commit, push -- GitHub Pages redeploys automatically
+on every push to the configured branch.
+
+**Feedback loop:** the page's footer links to "Open an issue on GitHub"
+(`/issues/new`) for anyone to report a bug or suggest a stat/formula
+change; that only works once the repo is public, since a private repo's
+issues aren't visible to non-collaborators either.
+
 ## Tests
 
 ```bash
