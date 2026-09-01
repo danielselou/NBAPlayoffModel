@@ -325,6 +325,7 @@
   .metric .m-label { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
   .methodology-note { color: var(--ink-3); font-size: 12px; max-width: 74ch; }
   .methodology-note a { color: inherit; }
+  .feedback-link { color: var(--prob); font-weight: 500; text-decoration: none; border-bottom: 1px solid currentColor; }
 
   @media (prefers-reduced-motion: no-preference) {
     .team-row { transition: background-color 120ms ease; }
@@ -562,6 +563,7 @@
   <footer>
     <div class="metrics-row" id="metrics-row"></div>
     <p class="methodology-note reveal">Headline metrics reflect out-of-sample seasons held out of training. Every season's standings, ratings, and predictions come from a genuine walk-forward retrain (only strictly-earlier seasons in the training set) &mdash; see the project README for full methodology and how to point this at live data.</p>
+    <p class="methodology-note reveal">Found a bug, have a stat/formula idea, or think something looks off? <a class="feedback-link" href="https://github.com/danielselou/NBAPlayoffModel/issues/new" target="_blank" rel="noopener">Open an issue on GitHub</a> &mdash; this project keeps getting tuned based on that feedback.</p>
   </footer>
 </div>
 
